@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard | HouseholdChores{% endblock %}
+{% block content %}
+<h2>Welcome, {{ user.first_name|default:user.username }}!</h2>
+<p class="muted"><span class="badge">{{ user.get_role_display }}</span> See this week's chores and mark them done.</p>
+<ul class="info-list">
+    <li><span>Username:</span><strong>{{ user.username }}</strong></li>
+    <li><span>Email:</span><strong>{{ user.email }}</strong></li>
+    <li><span>Last login:</span><strong>{{ user.last_login|date:"M d, Y" }}</strong></li>
+</ul>
+<div class="actions">
+    <a class="btn-link secondary" href="{% url 'profile' %}">My profile</a>
+</div>
+{% endblock %}

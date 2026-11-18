@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | HouseholdChores{% endblock %}
+{% block content %}
+<h2>Welcome, {{ user.first_name|default:user.username }}!</h2>
+<p class="muted"><span class="badge">{{ user.get_role_display }}</span> Manage your household's members and chores.</p>
+<ul class="info-list">
+    <li><span>Registered accounts:</span><strong>{{ account_count }}</strong></li>
+    <li><span>Household Admins:</span><strong>{{ admin_count }}</strong></li>
+    <li><span>Household Members:</span><strong>{{ member_count }}</strong></li>
+    <li><span>Last login:</span><strong>{{ user.last_login|date:"M d, Y" }}</strong></li>
+</ul>
+<div class="actions">
+    <a class="btn-link secondary" href="{% url 'profile' %}">My profile</a>
+</div>
+{% endblock %}
