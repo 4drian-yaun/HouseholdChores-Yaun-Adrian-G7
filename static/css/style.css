@@ -1,0 +1,270 @@
+html {
+  background: linear-gradient(135deg, #eef2ff 0%, #f4f6fb 50%, #e0e7ff 100%);
+  min-height: 100%;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #1c2333;
+  max-width: 540px;
+  margin: 48px auto;
+  padding: 36px;
+  background: #ffffff;
+  border: 1px solid #dfe3ee;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.1);
+  line-height: 1.5;
+}
+
+h1, h2 {
+  font-size: 1.7rem;
+  letter-spacing: -0.02em;
+  margin: 18px 0 22px;
+}
+
+form[action*="logout"] {
+  display: inline;
+}
+
+form[action*="logout"] button {
+  width: auto;
+  margin: 6px 0 0;
+  padding: 7px 14px;
+  background: transparent;
+  color: #1c2333;
+  border: 1px solid #dfe3ee;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+form[action*="logout"] button:hover {
+  background: transparent;
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+form p {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 18px;
+}
+
+label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  border: 1px solid #dfe3ee;
+  border-radius: 8px;
+  background: #fafbff;
+  font: inherit;
+  color: #1c2333;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #4f46e5;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.helptext {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #6b7489;
+}
+
+.helptext ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.errorlist {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+.errorlist li {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+}
+
+button,
+input[type="submit"] {
+  width: 100%;
+  padding: 13px;
+  background: #4f46e5;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover,
+input[type="submit"]:hover {
+  background: #4338ca;
+}
+
+a {
+  color: #4f46e5;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  body {
+    margin: 16px;
+    padding: 22px 18px;
+  }
+}
+
+.info-list {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  border: 1px solid #dfe3ee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.info-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 13px 16px;
+  background: #fafbff;
+  border-bottom: 1px solid #dfe3ee;
+}
+
+.info-list li:last-child {
+  border-bottom: none;
+}
+
+.info-list span {
+  color: #6b7489;
+  font-size: 0.9rem;
+}
+
+.btn-link {
+  display: block;
+  text-align: center;
+  padding: 13px;
+  background: #4f46e5;
+  color: #ffffff;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.btn-link:hover {
+  background: #4338ca;
+  text-decoration: none;
+}
+
+.btn-link.secondary {
+  background: transparent;
+  color: #4f46e5;
+  border: 1px solid #4f46e5;
+}
+
+.btn-link.secondary:hover {
+  background: #eef2ff;
+}
+
+.muted {
+  color: #6b7489;
+  margin-bottom: 20px;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #dfe3ee;
+}
+
+nav .brand {
+  font-size: 1.05rem;
+  margin-right: auto;
+}
+
+nav .greeting {
+  color: #6b7489;
+  font-size: 0.9rem;
+}
+
+.messages {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+}
+
+.messages li {
+  padding: 11px 14px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+}
+
+.messages li.success {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.messages li.error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.messages li.info,
+.messages li.warning {
+  background: #eef2ff;
+  color: #3730a3;
+  border-color: #c7d2fe;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
