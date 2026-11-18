@@ -1,23 +1,35 @@
 {% extends "base.html" %}
 {% block title %}My profile | HouseholdChores{% endblock %}
 {% block content %}
-<h2>My profile</h2>
-<ul class="info-list">
-    <li><span>Username:</span><strong>{{ user.username }}</strong></li>
-    <li><span>Role:</span><strong>{{ user.get_role_display }}</strong></li>
-    <li><span>Full name:</span><strong>{{ user.full_name }}</strong></li>
-    <li><span>Email:</span><strong>{{ user.email }}</strong></li>
-    <li><span>Contact number:</span><strong>{{ user.contact_number|default:"Not set" }}</strong></li>
-    <li><span>Joined:</span><strong>{{ user.date_joined|date:"M d, Y" }}</strong></li>
-</ul>
-<h2>Edit profile</h2>
-<form method="post" novalidate>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save changes</button>
-</form>
-<div class="actions">
-    <a class="btn-link secondary" href="{% url 'password_change' %}">Change password</a>
-    <a class="btn-link secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+<div class="page-head">
+    <div>
+        <h1>My profile</h1>
+        <p class="muted"><span class="badge">{{ user.get_role_display }}</span> Joined {{ user.date_joined|date:"M d, Y" }}</p>
+    </div>
+</div>
+<div class="narrow">
+    <section class="card">
+        <h2>Account details</h2>
+        <ul class="info-list">
+            <li><span>Username</span><strong>{{ user.username }}</strong></li>
+            <li><span>Role</span><strong>{{ user.get_role_display }}</strong></li>
+            <li><span>Full name</span><strong>{{ user.full_name }}</strong></li>
+            <li><span>Email</span><strong>{{ user.email }}</strong></li>
+            <li><span>Contact number</span><strong>{{ user.contact_number|default:"Not set" }}</strong></li>
+            <li><span>Joined</span><strong>{{ user.date_joined|date:"M d, Y" }}</strong></li>
+        </ul>
+    </section>
+    <section class="card">
+        <h2>Edit profile</h2>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save changes</button>
+        </form>
+        <div class="actions">
+            <a class="btn-link secondary" href="{% url 'password_change' %}">Change password</a>
+            <a class="btn-link secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+        </div>
+    </section>
 </div>
 {% endblock %}

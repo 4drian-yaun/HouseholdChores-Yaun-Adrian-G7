@@ -1,15 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Admin Dashboard | HouseholdChores{% endblock %}
 {% block content %}
-<h2>Welcome, {{ user.first_name|default:user.username }}!</h2>
-<p class="muted"><span class="badge">{{ user.get_role_display }}</span> Manage your household's members and chores.</p>
-<ul class="info-list">
-    <li><span>Registered accounts:</span><strong>{{ account_count }}</strong></li>
-    <li><span>Household Admins:</span><strong>{{ admin_count }}</strong></li>
-    <li><span>Household Members:</span><strong>{{ member_count }}</strong></li>
-    <li><span>Last login:</span><strong>{{ user.last_login|date:"M d, Y" }}</strong></li>
-</ul>
-<div class="actions">
-    <a class="btn-link secondary" href="{% url 'profile' %}">My profile</a>
+<div class="page-head">
+    <div>
+        <h1>Welcome, {{ user.first_name|default:user.username }}!</h1>
+        <p class="muted"><span class="badge">{{ user.get_role_display }}</span> Manage your household's members and chores.</p>
+    </div>
 </div>
+<div class="stats">
+    <div class="stat"><span>Registered accounts</span><strong>{{ account_count }}</strong></div>
+    <div class="stat"><span>Household Admins</span><strong>{{ admin_count }}</strong></div>
+    <div class="stat"><span>Household Members</span><strong>{{ member_count }}</strong></div>
+</div>
+<section class="card">
+    <h2>Your account</h2>
+    <ul class="info-list">
+        <li><span>Username</span><strong>{{ user.username }}</strong></li>
+        <li><span>Email</span><strong>{{ user.email }}</strong></li>
+        <li><span>Last login</span><strong>{{ user.last_login|date:"M d, Y" }}</strong></li>
+    </ul>
+    <div class="actions">
+        <a class="btn-link secondary" href="{% url 'profile' %}">My profile</a>
+    </div>
+</section>
 {% endblock %}

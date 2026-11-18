@@ -1,0 +1,14 @@
+<section class="hero">
+    <h1>{{ headline|default:"Who's doing what this week?" }}</h1>
+    <p class="lead">{{ lead|default:"Chores rotate every Monday, everyone sees the same chart, and no one has to nag." }}</p>
+    <div class="chart" aria-hidden="true">
+        <h3>This week <small>Mon - Sun</small></h3>
+        <ul>
+            <li><span class="who">A</span><span class="task">Take out trash<small>Ana</small></span><span class="state done">&#10003;</span></li>
+            <li><span class="who b">M</span><span class="task">Wash the dishes<small>Marco</small></span><span class="state done">&#10003;</span></li>
+            <li><span class="who c">J</span><span class="task">Vacuum the living room<small>Jules</small></span><span class="state"></span></li>
+            <li><span class="who d">K</span><span class="task">Clean the bathroom<small>Kira</small></span><span class="state"></span></li>
+        </ul>
+        <p class="foot">Rotates to the next person every Monday</p>
+    </div>
+</section>

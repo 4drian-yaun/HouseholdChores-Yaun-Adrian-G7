@@ -4,25 +4,37 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#1f6f5c">
         <title>{% block title %}HouseholdChores{% endblock %}</title>
+        <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
     </head>
     <body>
-        <nav>
-            <a class="brand" href="{% url 'dashboard' %}">HouseholdChores</a>
-            {% if user.is_authenticated %}
-                <span class="greeting">Hi, {{ user.username }}!</span>
-                <a href="{% url 'dashboard' %}">Dashboard</a>
-                <a href="{% url 'profile' %}">Profile</a>
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit">Log out</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}">Log in</a>
-                <a href="{% url 'signup' %}">Sign up</a>
-            {% endif %}
-        </nav>
+        <header class="topbar">
+            <div class="topbar-inner">
+                <a class="brand" href="{% url 'dashboard' %}">
+                    <img src="{% static 'img/logo.svg' %}" alt="" width="38" height="38">
+                    <span>HouseholdChores</span>
+                </a>
+                <nav>
+                    {% if user.is_authenticated %}
+                        <span class="greeting">Hi, {{ user.username }}!</span>
+                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                        <a href="{% url 'profile' %}">Profile</a>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit">Log out</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}">Log in</a>
+                        <a class="nav-cta" href="{% url 'signup' %}">Sign up</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </header>
         {% if messages %}
             <ul class="messages">
                 {% for message in messages %}
@@ -30,6 +42,6 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        <main>{% block content %}{% endblock %}</main>
+        <main class="page">{% block content %}{% endblock %}</main>
     </body>
 </html>

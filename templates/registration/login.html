@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Log in | HouseholdChores{% endblock %}
 {% block content %}
-<h2>Log in</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {{ form.as_p }}
-    <input type="hidden" name="next" value="{{ next }}">
-    <button type="submit">Log in</button>
-</form>
-<p>No account? <a href="{% url 'signup' %}">Sign up</a></p>
+<div class="auth">
+    {% include "partials/hero.html" %}
+    <section class="card auth-card">
+        <h2>Welcome back</h2>
+        <p class="muted">Log in to see this week's chores.</p>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {{ form.as_p }}
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit">Log in</button>
+        </form>
+        <p class="switch">No account yet? <a href="{% url 'signup' %}">Sign up</a></p>
+    </section>
+</div>
 {% endblock %}

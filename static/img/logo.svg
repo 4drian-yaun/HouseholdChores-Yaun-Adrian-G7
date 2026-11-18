@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="HouseholdChores logo">
+  <rect width="64" height="64" rx="16" fill="#1F6F5C"/>
+  <g fill="none" stroke="#F5BE1D" stroke-width="3.6" stroke-linecap="round">
+    <path d="M9.78 26.05 A23 23 0 0 1 50.84 18.81"/>
+    <path d="M54.22 37.95 A23 23 0 0 1 13.16 45.19"/>
+  </g>
+  <g fill="#F5BE1D">
+    <path d="M54.94 24.66 L54.09 14.95 L46.10 20.54 Z"/>
+    <path d="M9.06 39.34 L9.91 49.05 L17.90 43.46 Z"/>
+  </g>
+  <path d="M21 33.5 L32 23 L43 33.5 V43.5 a1.5 1.5 0 0 1 -1.5 1.5 H22.5 a1.5 1.5 0 0 1 -1.5 -1.5 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M27 37.5 L30.8 41.2 L37.5 33.6" fill="none" stroke="#1F6F5C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
