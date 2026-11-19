@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Analytics | HouseholdChores{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Analytics</h1>
+        <p class="muted">Based on finished weeks only. {% if current_pending %}{{ current_pending }} chore(s) still pending this week are not counted.{% endif %}</p>
+    </div>
+</div>
+{% if not stats.has_data %}
+<section class="card"><p class="empty">Analytics appear after the first week closes.</p></section>
+{% else %}
+<div class="stats">
+    <div class="stat"><span>Finished assignments</span><strong>{{ stats.total }}</strong></div>
+    <div class="stat"><span>Completed</span><strong>{{ stats.done }}</strong></div>
+    <div class="stat"><span>Completion rate</span><strong>{{ stats.done_pct }}%</strong></div>
+</div>
+<div class="grid-2">
+    <section class="card">
+        <h2>Completed vs. missed</h2>
+        <div class="pie-wrap">
+            <div class="pie" style="--done: {{ stats.done_pct }}" role="img" aria-label="{{ stats.done_pct }} percent completed, {{ stats.missed_pct }} percent missed"><span>{{ stats.done_pct }}%</span></div>
+            <ul class="legend">
+                <li><i class="dot done"></i>Completed <strong>{{ stats.done }}</strong></li>
+                <li><i class="dot missed"></i>Missed <strong>{{ stats.missed }}</strong></li>
+            </ul>
+        </div>
+    </section>
+    <section class="card">
+        <h2>Completed tasks per member</h2>
+        <ul class="bars">
+            {% for m in stats.members %}
+            <li>
+                <div class="bar-label"><span>{{ m.member__display_name }}{% if not m.member__is_active %} <span class="tag">removed</span>{% endif %}</span><strong>{{ m.done }} done &middot; {{ m.rate }}%</strong></div>
+                <div class="track"><span style="width: {{ m.width }}%"></span></div>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+</div>
+<div class="grid-2">
+    <section class="card">
+        <h2>Most missed chores</h2>
+        {% if stats.chores %}
+        <ul class="bars warn">
+            {% for c in stats.chores %}
+            <li>
+                <div class="bar-label"><span>{{ c.chore__name }}{% if not c.chore__is_active %} <span class="tag">retired</span>{% endif %}</span><strong>{{ c.missed }} of {{ c.total }} missed</strong></div>
+                <div class="track"><span style="width: {{ c.width }}%"></span></div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty">Nothing has been missed. Nice work.</p>
+        {% endif %}
+    </section>
+    <section class="card">
+        <h2>Weekly completion trend</h2>
+        <div class="trend">
+            {% for w in stats.weeks %}
+            <div class="trend-col" title="{{ w.done }} of {{ w.total }} completed">
+                <div class="trend-bar"><span style="height: {{ w.rate }}%"></span></div>
+                <strong>{{ w.rate }}%</strong>
+                <small>{{ w.week_start_date|date:"M d" }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endif %}
+{% endblock %}

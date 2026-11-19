@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Members | HouseholdChores{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Members</h1>
+        <p class="muted">Chores rotate in the order shown below, then start over after the last person.</p>
+    </div>
+    <a class="btn-link btn-inline" href="{% url 'member_add' %}">Add member</a>
+</div>
+<section class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Name</th><th>Account</th><th>Role</th><th>Order</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for m in active_members %}
+                <tr>
+                    <td>{{ m.rotation_order }}</td>
+                    <td><strong>{{ m.display_name }}</strong>{% if m.pk == request.membership.pk %} <span class="tag">you</span>{% endif %}</td>
+                    <td>{% if m.user %}{{ m.user.username }}{% else %}<span class="sub">No account (cannot log in)</span>{% endif %}</td>
+                    <td>{{ m.get_role_display }}</td>
+                    <td class="cell-action">
+                        {% if not forloop.first %}
+                        <form method="post" action="{% url 'member_move' m.pk 'up' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost" aria-label="Move up">&uarr;</button></form>
+                        {% endif %}
+                        {% if not forloop.last %}
+                        <form method="post" action="{% url 'member_move' m.pk 'down' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost" aria-label="Move down">&darr;</button></form>
+                        {% endif %}
+                    </td>
+                    <td class="cell-action">
+                        <a class="btn-sm ghost" href="{% url 'member_edit' m.pk %}">Edit</a>
+                        {% if m.pk != request.membership.pk %}<a class="btn-sm danger" href="{% url 'member_remove' m.pk %}">Remove</a>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% if former_members %}
+<section class="card">
+    <h2>Former members</h2>
+    <p class="muted">Removed members stay in history but are skipped in every future rotation.</p>
+    <ul class="info-list">
+        {% for m in former_members %}
+        <li><span>{{ m.display_name }}</span><strong>{% if m.user %}{{ m.user.username }}{% else %}No account{% endif %}</strong></li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% endblock %}

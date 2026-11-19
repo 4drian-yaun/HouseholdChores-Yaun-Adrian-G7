@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}History | HouseholdChores{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>History</h1>
+        <p class="muted">Past weeks are read-only.</p>
+    </div>
+</div>
+<section class="card">
+    {% if weeks %}
+    <form method="get" class="filter-form">
+        <label for="week">Week</label>
+        <select name="week" id="week">
+            {% for w in weeks %}
+            <option value="{{ w|date:'Y-m-d' }}" {% if w == selected %}selected{% endif %}>{{ w|date:"M d, Y" }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-sm">Show</button>
+    </form>
+    <h2>Week of {{ overview.week_start|date:"M d" }} &ndash; {{ overview.week_end|date:"M d, Y" }}</h2>
+    {% include "partials/week_table.html" %}
+    {% else %}
+    <p class="empty">No past weeks yet. History appears after the first week ends.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -5,6 +5,9 @@ from django.views import View
 from django.views.generic import TemplateView
 
 from accounts.models import CustomUser
+from chores.services import sync_household, week_overview
+from households.forms import HouseholdForm
+from households.utils import get_membership
 
 
 class RoleRequiredMixin(LoginRequiredMixin):
@@ -24,18 +27,28 @@ class DashboardRedirectView(LoginRequiredMixin, View):
         return redirect("member_dashboard")
 
 
-class AdminDashboardView(RoleRequiredMixin, TemplateView):
-    template_name = "dashboard/admin_dashboard.html"
-    required_role = CustomUser.Role.ADMIN
-
+class HouseholdDashboardMixin(RoleRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["account_count"] = CustomUser.objects.count()
-        context["admin_count"] = CustomUser.objects.filter(role=CustomUser.Role.ADMIN).count()
-        context["member_count"] = CustomUser.objects.filter(role=CustomUser.Role.MEMBER).count()
+        membership = get_membership(self.request.user)
+        context["membership"] = membership
+        if membership is None:
+            context["household_form"] = HouseholdForm()
+            return context
+        household = membership.household
+        sync_household(household)
+        context["household"] = household
+        context["overview"] = week_overview(household, membership)
+        context["member_count"] = household.members.filter(is_active=True).count()
+        context["chore_count"] = household.chores.filter(is_active=True).count()
         return context
 
 
-class MemberDashboardView(RoleRequiredMixin, TemplateView):
+class AdminDashboardView(HouseholdDashboardMixin, TemplateView):
+    template_name = "dashboard/admin_dashboard.html"
+    required_role = CustomUser.Role.ADMIN
+
+
+class MemberDashboardView(HouseholdDashboardMixin, TemplateView):
     template_name = "dashboard/member_dashboard.html"
     required_role = CustomUser.Role.MEMBER

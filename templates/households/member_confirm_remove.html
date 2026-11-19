@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Remove member | HouseholdChores{% endblock %}
+{% block content %}
+<div class="narrow">
+    <section class="card">
+        <h2>Remove {{ member.display_name }}?</h2>
+        <p class="muted">They will be skipped in all future rotations. Their pending chores for this week go to other members, and their past history is kept.</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="danger">Yes, remove member</button>
+        </form>
+        <div class="actions">
+            <a class="btn-link secondary" href="{% url 'member_list' %}">Cancel</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

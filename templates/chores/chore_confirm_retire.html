@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Retire chore | HouseholdChores{% endblock %}
+{% block content %}
+<div class="narrow">
+    <section class="card">
+        <h2>Retire "{{ chore.name }}"?</h2>
+        <p class="muted">It will get no new assignments and any unfinished assignment this week is removed. Past assignments stay in history.</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="danger">Yes, retire chore</button>
+        </form>
+        <div class="actions">
+            <a class="btn-link secondary" href="{% url 'chore_list' %}">Cancel</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ heading }} | HouseholdChores{% endblock %}
+{% block content %}
+<div class="narrow">
+    <section class="card">
+        <h2>{{ heading }}</h2>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">{{ submit_label }}</button>
+        </form>
+        <div class="actions">
+            <a class="btn-link secondary" href="{% url 'member_list' %}">Back to members</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

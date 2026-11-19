@@ -1,0 +1,33 @@
+{% if overview.assignments %}
+<div class="progress-line">
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ overview.percent }}"><span style="width: {{ overview.percent }}%"></span></div>
+    <strong>{{ overview.done }} of {{ overview.total }} done</strong>
+</div>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr><th>Chore</th><th>Assigned to</th><th>Status</th><th>Completed</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% for a in overview.assignments %}
+            <tr>
+                <td><strong>{{ a.chore.name }}</strong>{% if not a.chore.is_active %} <span class="tag">retired</span>{% endif %}{% if a.chore.description %}<small class="sub">{{ a.chore.description }}</small>{% endif %}</td>
+                <td>{{ a.member.display_name }}{% if not a.member.is_active %} <span class="tag">removed</span>{% endif %}{% if not a.member.user_id %}<small class="sub">No login</small>{% endif %}</td>
+                <td><span class="status {{ a.status|lower }}">{{ a.get_status_display }}</span></td>
+                <td>{% if a.completed_at %}{{ a.completed_at|date:"M d, g:i A" }}{% else %}&ndash;{% endif %}</td>
+                <td class="cell-action">
+                    {% if a.can_complete %}
+                    <form method="post" action="{% url 'assignment_complete' a.pk %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-sm">Mark done</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="empty">No chores for this week yet.</p>
+{% endif %}
