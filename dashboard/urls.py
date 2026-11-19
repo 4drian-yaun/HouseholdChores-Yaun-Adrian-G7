@@ -1,9 +1,9 @@
 from django.urls import path
 
-from .views import AdminDashboardView, DashboardRedirectView, MemberDashboardView
+from .views import DashboardLegacyRedirectView, DashboardView
 
 urlpatterns = [
-    path("", DashboardRedirectView.as_view(), name="dashboard"),
-    path("dashboard/admin/", AdminDashboardView.as_view(), name="admin_dashboard"),
-    path("dashboard/member/", MemberDashboardView.as_view(), name="member_dashboard"),
+    path("", DashboardView.as_view(), name="dashboard"),
+    path("dashboard/admin/", DashboardLegacyRedirectView.as_view(), name="admin_dashboard"),
+    path("dashboard/member/", DashboardLegacyRedirectView.as_view(), name="member_dashboard"),
 ]

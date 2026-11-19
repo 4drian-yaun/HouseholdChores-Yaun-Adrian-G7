@@ -6,12 +6,17 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import FormView, TemplateView
 
-from accounts.models import CustomUser
-
 from .forms import HouseholdForm, MemberForm
 from .mixins import HouseholdContextMixin
 from .models import HouseholdMember
-from .services import MemberError, add_member, create_household, move_member, remove_member, update_member
+from .services import (
+    MemberError,
+    add_member,
+    create_household,
+    move_member,
+    remove_member,
+    update_member,
+)
 from .utils import get_membership
 
 
@@ -19,9 +24,6 @@ class CreateHouseholdView(LoginRequiredMixin, View):
     http_method_names = ["post"]
 
     def post(self, request):
-        if request.user.role != CustomUser.Role.ADMIN:
-            messages.error(request, "Only a Household Admin account can create a household.")
-            return redirect("dashboard")
         if get_membership(request.user) is not None:
             messages.error(request, "You already belong to a household.")
             return redirect("dashboard")
@@ -30,7 +32,9 @@ class CreateHouseholdView(LoginRequiredMixin, View):
             messages.error(request, "Please enter a household name.")
             return redirect("dashboard")
         household = create_household(request.user, form.cleaned_data["name"])
-        messages.success(request, f'Household "{household.name}" created. Add your members and chores next.')
+        messages.success(
+            request, f'Household "{household.name}" created. Add your members and chores next.'
+        )
         return redirect("dashboard")
 
 
@@ -64,7 +68,10 @@ class MemberFormMixin(HouseholdContextMixin):
 class MemberAddView(MemberFormMixin, FormView):
     def form_valid(self, form):
         member, moved = add_member(
-            self.request.household, form.cleaned_data["display_name"], form.cleaned_data["username"]
+            self.request.household,
+            form.cleaned_data["display_name"],
+            form.cleaned_data["username"],
+            form.cleaned_data["role"],
         )
         messages.success(self.request, f"{member.display_name} was added to the household.")
         if moved:
@@ -95,7 +102,16 @@ class MemberEditView(MemberFormMixin, FormView):
         return super().get_form_kwargs()
 
     def form_valid(self, form):
-        update_member(self.member, form.cleaned_data["display_name"], form.cleaned_data["username"])
+        try:
+            update_member(
+                self.member,
+                form.cleaned_data["display_name"],
+                form.cleaned_data["username"],
+                form.cleaned_data["role"],
+            )
+        except MemberError as error:
+            messages.error(self.request, str(error))
+            return self.form_invalid(form)
         messages.success(self.request, "Member updated.")
         return super().form_valid(form)
 

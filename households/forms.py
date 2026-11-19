@@ -26,6 +26,11 @@ class MemberForm(forms.Form):
         label="Linked account username",
         help_text="Optional. Enter the username of a registered account so this person can log in. Leave blank for someone without an account.",
     )
+    role = forms.ChoiceField(
+        choices=HouseholdMember.Role.choices,
+        initial=HouseholdMember.Role.MEMBER,
+        label="Household role",
+    )
 
     def __init__(self, *args, household, member=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,9 +39,9 @@ class MemberForm(forms.Form):
         if member is not None:
             self.initial.setdefault("display_name", member.display_name)
             self.initial.setdefault("username", member.user.username if member.user else "")
-            if member.role == HouseholdMember.Role.ADMIN:
-                self.fields["username"].disabled = True
-                self.fields["username"].help_text = "A Household Admin's linked account cannot be changed."
+            self.initial.setdefault("role", member.role)
+            if member.role == HouseholdMember.Role.ADMIN and member.user:
+                self.fields["username"].help_text = "Enter a different username to transfer this profile, or keep as is."
 
     def clean_display_name(self):
         name = self.cleaned_data["display_name"].strip()
@@ -57,3 +62,25 @@ class MemberForm(forms.Form):
         if taken.exists():
             raise forms.ValidationError("That account is already linked to an active member profile.")
         return user
+
+    def clean(self):
+        cleaned_data = super().clean()
+        role = cleaned_data.get("role")
+        user = cleaned_data.get("username")
+        if role == HouseholdMember.Role.ADMIN and not user:
+            self.add_error("role", "A member must have a linked user account to be a Household Admin.")
+        if (
+            self.member
+            and self.member.role == HouseholdMember.Role.ADMIN
+            and role != HouseholdMember.Role.ADMIN
+        ):
+            admins = (
+                self.household.members.filter(is_active=True, role=HouseholdMember.Role.ADMIN)
+                .exclude(pk=self.member.pk)
+                .count()
+            )
+            if admins < 1:
+                self.add_error(
+                    "role", "A household must have at least one active Household Admin at all times."
+                )
+        return cleaned_data

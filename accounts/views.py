@@ -1,11 +1,13 @@
 from django.contrib import messages
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, FormView, UpdateView
 
-from .forms import CustomAuthenticationForm, CustomUserCreationForm, ProfileForm
+from .forms import AccountDeleteForm, CustomAuthenticationForm, CustomUserCreationForm, ProfileForm
+from .services import delete_user_account
 
 
 class SignUpView(CreateView):
@@ -70,4 +72,26 @@ class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
 
     def form_invalid(self, form):
         messages.error(self.request, "Password not changed. Please fix the errors below.")
+        return super().form_invalid(form)
+
+
+class AccountDeleteView(LoginRequiredMixin, FormView):
+    template_name = "accounts/account_confirm_delete.html"
+    form_class = AccountDeleteForm
+    success_url = reverse_lazy("login")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        user = self.request.user
+        delete_user_account(user)
+        auth_logout(self.request)
+        messages.success(self.request, "Your account has been permanently deleted.")
+        return redirect(self.success_url)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Could not delete account. Please verify your password.")
         return super().form_invalid(form)

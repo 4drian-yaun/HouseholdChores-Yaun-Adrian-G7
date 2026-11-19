@@ -1,5 +1,6 @@
 import datetime
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q, Value
 
@@ -66,6 +67,14 @@ class Assignment(models.Model):
                 name="due_date_is_sunday",
             ),
         ]
+
+    def clean(self):
+        super().clean()
+        if self.chore_id and self.member_id:
+            if self.chore.household_id != self.member.household_id:
+                raise ValidationError("Assigned member must belong to the same household as the chore.")
+            if self._state.adding and not self.member.is_active:
+                raise ValidationError("Chore can only be assigned to an active household member.")
 
     def save(self, *args, **kwargs):
         self.due_date = self.week_start_date + datetime.timedelta(days=6)

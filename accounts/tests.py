@@ -4,14 +4,13 @@ from django.urls import reverse
 from .models import CustomUser
 
 
-def make_user(username, role=CustomUser.Role.MEMBER, email=None, password="StrongPass123"):
+def make_user(username, email=None, password="StrongPass123"):
     return CustomUser.objects.create_user(
         username=username,
         email=email or f"{username}@example.com",
         password=password,
         first_name=username.title(),
         last_name="Tester",
-        role=role,
     )
 
 
@@ -23,7 +22,6 @@ class RegistrationTests(TestCase):
             "last_name": "User",
             "email": "new@example.com",
             "contact_number": "",
-            "role": "MEMBER",
             "password1": "StrongPass123",
             "password2": "StrongPass123",
         }
@@ -69,16 +67,14 @@ class RegistrationTests(TestCase):
 
 class LoginLogoutTests(TestCase):
     def setUp(self):
-        self.admin = make_user("boss", CustomUser.Role.ADMIN)
+        self.boss = make_user("boss")
         self.member = make_user("roomie")
 
-    def test_admin_login_goes_to_admin_dashboard(self):
-        response = self.client.post(reverse("login"), {"username": "boss", "password": "StrongPass123"}, follow=True)
-        self.assertRedirects(response, reverse("admin_dashboard"))
-
-    def test_member_login_goes_to_member_dashboard(self):
-        response = self.client.post(reverse("login"), {"username": "roomie", "password": "StrongPass123"}, follow=True)
-        self.assertRedirects(response, reverse("member_dashboard"))
+    def test_user_login_goes_to_dashboard(self):
+        response = self.client.post(
+            reverse("login"), {"username": "boss", "password": "StrongPass123"}, follow=True
+        )
+        self.assertRedirects(response, reverse("dashboard"))
 
     def test_invalid_credentials(self):
         response = self.client.post(reverse("login"), {"username": "boss", "password": "wrong"})
@@ -94,40 +90,29 @@ class LoginLogoutTests(TestCase):
 
 class AccessControlTests(TestCase):
     def setUp(self):
-        self.admin = make_user("boss", CustomUser.Role.ADMIN)
+        self.boss = make_user("boss")
         self.member = make_user("roomie")
 
     def test_anonymous_redirected_to_login(self):
-        for name in ["dashboard", "admin_dashboard", "member_dashboard", "profile", "password_change"]:
+        for name in ["dashboard", "profile", "password_change"]:
             url = reverse(name)
             response = self.client.get(url)
             self.assertRedirects(response, f"{reverse('login')}?next={url}")
 
-    def test_member_cannot_open_admin_dashboard(self):
-        self.client.force_login(self.member)
-        response = self.client.get(reverse("admin_dashboard"), follow=True)
-        self.assertRedirects(response, reverse("member_dashboard"))
-        self.assertContains(response, "do not have access")
-
-    def test_admin_cannot_open_member_dashboard(self):
-        self.client.force_login(self.admin)
-        response = self.client.get(reverse("member_dashboard"), follow=True)
-        self.assertRedirects(response, reverse("admin_dashboard"))
-
-    def test_each_role_sees_own_dashboard(self):
-        self.client.force_login(self.admin)
-        self.assertEqual(self.client.get(reverse("admin_dashboard")).status_code, 200)
-        self.client.force_login(self.member)
-        self.assertEqual(self.client.get(reverse("member_dashboard")).status_code, 200)
+    def test_logged_in_user_sees_dashboard(self):
+        self.client.force_login(self.boss)
+        self.assertEqual(self.client.get(reverse("dashboard")).status_code, 200)
 
     def test_logged_in_user_redirected_from_signup_and_login(self):
         self.client.force_login(self.member)
-        self.assertRedirects(self.client.get(reverse("signup")), reverse("dashboard"), fetch_redirect_response=False)
+        self.assertRedirects(
+            self.client.get(reverse("signup")), reverse("dashboard"), fetch_redirect_response=False
+        )
         self.assertEqual(self.client.get(reverse("login")).status_code, 302)
 
-    def test_superuser_gets_admin_role(self):
+    def test_superuser_creation(self):
         user = CustomUser.objects.create_superuser("root", "root@example.com", "StrongPass123")
-        self.assertEqual(user.role, CustomUser.Role.ADMIN)
+        self.assertTrue(user.is_superuser)
 
 
 class ProfileTests(TestCase):
@@ -144,7 +129,12 @@ class ProfileTests(TestCase):
     def test_update_profile(self):
         response = self.client.post(
             reverse("profile"),
-            {"first_name": "Rm", "last_name": "Mate", "email": "rm@example.com", "contact_number": "09171234567"},
+            {
+                "first_name": "Rm",
+                "last_name": "Mate",
+                "email": "rm@example.com",
+                "contact_number": "09171234567",
+            },
             follow=True,
         )
         self.assertContains(response, "Your profile was updated")
@@ -155,25 +145,37 @@ class ProfileTests(TestCase):
     def test_cannot_use_other_users_email(self):
         self.client.post(
             reverse("profile"),
-            {"first_name": "Rm", "last_name": "Mate", "email": "other@example.com", "contact_number": ""},
+            {
+                "first_name": "Rm",
+                "last_name": "Mate",
+                "email": "other@example.com",
+                "contact_number": "",
+            },
         )
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, "roomie@example.com")
 
-    def test_profile_post_cannot_change_role_or_other_user(self):
+    def test_profile_post_cannot_change_other_user(self):
         self.client.post(
             reverse("profile"),
-            {"first_name": "Rm", "last_name": "Mate", "email": "roomie@example.com", "contact_number": "", "role": "ADMIN"},
+            {
+                "first_name": "Rm",
+                "last_name": "Mate",
+                "email": "roomie@example.com",
+                "contact_number": "",
+            },
         )
-        self.user.refresh_from_db()
         self.other.refresh_from_db()
-        self.assertEqual(self.user.role, CustomUser.Role.MEMBER)
         self.assertEqual(self.other.first_name, "Other")
 
     def test_change_password(self):
         response = self.client.post(
             reverse("password_change"),
-            {"old_password": "StrongPass123", "new_password1": "BrandNewPass456", "new_password2": "BrandNewPass456"},
+            {
+                "old_password": "StrongPass123",
+                "new_password1": "BrandNewPass456",
+                "new_password2": "BrandNewPass456",
+            },
             follow=True,
         )
         self.assertContains(response, "Your password was changed")
@@ -183,7 +185,64 @@ class ProfileTests(TestCase):
     def test_change_password_wrong_current(self):
         self.client.post(
             reverse("password_change"),
-            {"old_password": "nope", "new_password1": "BrandNewPass456", "new_password2": "BrandNewPass456"},
+            {
+                "old_password": "nope",
+                "new_password1": "BrandNewPass456",
+                "new_password2": "BrandNewPass456",
+            },
         )
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("StrongPass123"))
+
+
+class AccountDeleteTests(TestCase):
+    def setUp(self):
+        self.user = make_user("deleteme")
+        self.client.force_login(self.user)
+
+    def test_anonymous_redirected(self):
+        self.client.logout()
+        response = self.client.get(reverse("account_delete"))
+        self.assertRedirects(response, f"{reverse('login')}?next={reverse('account_delete')}")
+
+    def test_delete_wrong_password(self):
+        response = self.client.post(reverse("account_delete"), {"password": "wrongpassword"})
+        self.assertEqual(CustomUser.objects.filter(username="deleteme").count(), 1)
+        self.assertContains(response, "Incorrect password")
+
+    def test_delete_success_without_household(self):
+        response = self.client.post(
+            reverse("account_delete"), {"password": "StrongPass123"}, follow=True
+        )
+        self.assertRedirects(response, reverse("login"))
+        self.assertFalse(CustomUser.objects.filter(username="deleteme").exists())
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_delete_success_with_household_cleanup(self):
+        from households.services import add_member, create_household
+        household = create_household(self.user, "Delete House")
+        second_user = make_user("roommate")
+        add_member(household, "Roomie", second_user)
+
+        response = self.client.post(
+            reverse("account_delete"), {"password": "StrongPass123"}, follow=True
+        )
+        self.assertRedirects(response, reverse("login"))
+        self.assertFalse(CustomUser.objects.filter(username="deleteme").exists())
+        household.refresh_from_db()
+        self.assertEqual(household.created_by, second_user)
+
+    def test_delete_with_unlinked_member_and_assignments(self):
+        from datetime import date
+        from chores.models import Assignment, Chore
+        from households.services import add_member, create_household
+        household = create_household(self.user, "Yaun Fam")
+        noob, _ = add_member(household, "noob", None)
+        chore = Chore.objects.create(household=household, name="Washing the dishes")
+        Assignment.objects.create(chore=chore, member=noob, week_start_date=date(2026, 11, 16))
+
+        response = self.client.post(
+            reverse("account_delete"), {"password": "StrongPass123"}, follow=True
+        )
+        self.assertRedirects(response, reverse("login"))
+        self.assertFalse(CustomUser.objects.filter(username="deleteme").exists())

@@ -1,0 +1,3 @@
+# Cron schedule for HouseholdChores weekly rotation (F-05)
+# Runs at 00:00 every Monday (start of the new chore week)
+0 0 * * 1 cd /path/to/HouseholdChores && /path/to/venv/bin/python manage.py rotate_weekly >> /var/log/rotate_weekly.log 2>&1

@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from unittest.mock import patch
 
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
@@ -11,10 +12,10 @@ from households.services import add_member, create_household, remove_member
 
 from .models import Assignment, Chore
 from .services import (
+    CompletionError,
     analytics,
     complete_assignment,
     create_chore,
-    CompletionError,
     retire_chore,
     sync_household,
 )
@@ -26,20 +27,19 @@ def at(day):
     return patch("django.utils.timezone.localdate", return_value=day)
 
 
-def make_user(username, role=CustomUser.Role.MEMBER):
+def make_user(username):
     return CustomUser.objects.create_user(
         username=username,
         email=f"{username}@example.com",
         password="StrongPass123",
         first_name=username.title(),
         last_name="Tester",
-        role=role,
     )
 
 
 class Base(TestCase):
     def setUp(self):
-        self.boss = make_user("boss", CustomUser.Role.ADMIN)
+        self.boss = make_user("boss")
         self.ana = make_user("ana")
         self.household = create_household(self.boss, "Casa")
         self.boss_member = self.household.members.get(user=self.boss)
@@ -94,7 +94,11 @@ class RotationTests(Base):
             chore = self.chore("Trash")
         with at(MONDAY + timedelta(weeks=3)):
             sync_household(self.household)
-        weeks = list(Assignment.objects.filter(chore=chore).order_by("week_start_date").values_list("status", flat=True))
+        weeks = list(
+            Assignment.objects.filter(chore=chore)
+            .order_by("week_start_date")
+            .values_list("status", flat=True)
+        )
         self.assertEqual(weeks, ["MISSED", "MISSED", "MISSED", "PENDING"])
 
     def test_sync_is_idempotent(self):
@@ -110,7 +114,12 @@ class RotationTests(Base):
         with at(MONDAY + timedelta(days=7)):
             retire_chore(chore)
             sync_household(self.household)
-        self.assertEqual(Assignment.objects.filter(chore=chore, week_start_date=MONDAY + timedelta(days=7)).count(), 0)
+        self.assertEqual(
+            Assignment.objects.filter(
+                chore=chore, week_start_date=MONDAY + timedelta(days=7)
+            ).count(),
+            0,
+        )
         self.assertTrue(Assignment.objects.filter(chore=chore, week_start_date=MONDAY).exists())
 
     def test_retire_removes_unfinished_current_assignment(self):
@@ -120,7 +129,7 @@ class RotationTests(Base):
         self.assertFalse(Assignment.objects.filter(chore=chore).exists())
 
     def test_new_member_mid_week_takes_a_chore_from_overloaded_member(self):
-        solo = make_user("solo", CustomUser.Role.ADMIN)
+        solo = make_user("solo")
         household = create_household(solo, "Solo House")
         with at(MONDAY):
             create_chore(household, "A", "")
@@ -128,18 +137,24 @@ class RotationTests(Base):
             create_chore(household, "C", "")
             member, moved = add_member(household, "New", None)
         self.assertIsNotNone(moved)
-        self.assertEqual(Assignment.objects.filter(member=member, week_start_date=MONDAY).count(), 1)
+        self.assertEqual(
+            Assignment.objects.filter(member=member, week_start_date=MONDAY).count(), 1
+        )
 
     def test_removed_member_chores_move_and_rotation_skips_them(self):
         with at(MONDAY):
             for name in ("A", "B", "C"):
                 self.chore(name)
             remove_member(self.cam_member, self.boss_member)
-        self.assertFalse(Assignment.objects.filter(member=self.cam_member, status="PENDING").exists())
+        self.assertFalse(
+            Assignment.objects.filter(member=self.cam_member, status="PENDING").exists()
+        )
         with at(MONDAY + timedelta(days=7)):
             sync_household(self.household)
         self.assertFalse(
-            Assignment.objects.filter(member=self.cam_member, week_start_date=MONDAY + timedelta(days=7)).exists()
+            Assignment.objects.filter(
+                member=self.cam_member, week_start_date=MONDAY + timedelta(days=7)
+            ).exists()
         )
 
 
@@ -148,13 +163,17 @@ class ConstraintTests(Base):
         with at(MONDAY):
             chore = self.chore("Trash")
         with self.assertRaises(IntegrityError), transaction.atomic():
-            Assignment.objects.create(chore=chore, member=self.boss_member, week_start_date=MONDAY)
+            Assignment.objects.create(
+                chore=chore, member=self.boss_member, week_start_date=MONDAY
+            )
 
     def test_week_must_start_on_monday(self):
         with at(MONDAY):
             chore = self.chore("Trash")
         with self.assertRaises(IntegrityError), transaction.atomic():
-            Assignment.objects.create(chore=chore, member=self.boss_member, week_start_date=MONDAY + timedelta(days=9))
+            Assignment.objects.create(
+                chore=chore, member=self.boss_member, week_start_date=MONDAY + timedelta(days=9)
+            )
 
     def test_active_chore_names_unique_but_retired_name_reusable(self):
         with at(MONDAY):
@@ -166,7 +185,18 @@ class ConstraintTests(Base):
 
     def test_rotation_order_unique_per_household(self):
         with self.assertRaises(IntegrityError), transaction.atomic():
-            HouseholdMember.objects.create(household=self.household, display_name="Dup", rotation_order=1)
+            HouseholdMember.objects.create(
+                household=self.household, display_name="Dup", rotation_order=1
+            )
+
+    def test_chore_and_member_must_belong_to_same_household(self):
+        other_user = make_user("other_house_user")
+        other_house = create_household(other_user, "Other House")
+        other_member = other_house.members.first()
+        chore = self.chore("Dishes")
+        assignment = Assignment(chore=chore, member=other_member, week_start_date=MONDAY)
+        with self.assertRaises(ValidationError):
+            assignment.clean()
 
 
 class CompletionTests(Base):
@@ -229,53 +259,60 @@ class CompletionTests(Base):
         self.assertEqual(self.assignment_obj.status, Assignment.Status.COMPLETED)
 
     def test_other_household_assignment_is_404(self):
-        stranger = make_user("stranger", CustomUser.Role.ADMIN)
+        stranger = make_user("stranger")
         create_household(stranger, "Other House")
         self.client.force_login(stranger)
         with at(MONDAY):
-            response = self.client.post(reverse("assignment_complete", args=[self.assignment_obj.pk]))
+            response = self.client.post(
+                reverse("assignment_complete", args=[self.assignment_obj.pk])
+            )
         self.assertEqual(response.status_code, 404)
 
 
 class DashboardHistoryAnalyticsTests(Base):
     def test_dashboard_shows_only_own_household(self):
-        other = make_user("other", CustomUser.Role.ADMIN)
+        other = make_user("other")
         other_house = create_household(other, "Rival House")
         with at(MONDAY):
             self.chore("Trash")
             create_chore(other_house, "Secret Chore", "")
             self.client.force_login(self.boss)
-            response = self.client.get(reverse("admin_dashboard"))
+            response = self.client.get(reverse("dashboard"))
         self.assertContains(response, "Casa")
         self.assertContains(response, "Trash")
         self.assertNotContains(response, "Secret Chore")
         self.assertNotContains(response, "Rival House")
 
-    def test_member_without_household_sees_waiting_page(self):
+    def test_member_without_household_sees_create_and_waiting_info(self):
         loner = make_user("loner")
         self.client.force_login(loner)
-        response = self.client.get(reverse("member_dashboard"))
-        self.assertContains(response, "Waiting for your household")
+        response = self.client.get(reverse("dashboard"))
+        self.assertContains(response, "Create your household")
+        self.assertContains(response, "Waiting to join an existing household?")
 
-    def test_admin_without_household_can_create_one(self):
-        fresh = make_user("fresh", CustomUser.Role.ADMIN)
+    def test_any_user_without_household_can_create_one(self):
+        fresh = make_user("fresh")
         self.client.force_login(fresh)
-        response = self.client.post(reverse("household_create"), {"name": "New Place"}, follow=True)
+        response = self.client.post(
+            reverse("household_create"), {"name": "New Place"}, follow=True
+        )
         self.assertContains(response, "New Place")
         member = HouseholdMember.objects.get(user=fresh)
         self.assertEqual(member.role, HouseholdMember.Role.ADMIN)
 
+    def test_user_already_in_household_cannot_create_another(self):
+        self.client.force_login(self.ana)
+        response = self.client.post(
+            reverse("household_create"), {"name": "Second House"}, follow=True
+        )
+        self.assertContains(response, "already belong to a household")
+        self.assertEqual(HouseholdMember.objects.filter(user=self.ana).count(), 1)
+
     def test_household_needs_a_name(self):
-        fresh = make_user("fresh", CustomUser.Role.ADMIN)
+        fresh = make_user("fresh")
         self.client.force_login(fresh)
         self.client.post(reverse("household_create"), {"name": "   "})
         self.assertFalse(HouseholdMember.objects.filter(user=fresh).exists())
-
-    def test_member_account_cannot_create_household(self):
-        loner = make_user("loner")
-        self.client.force_login(loner)
-        self.client.post(reverse("household_create"), {"name": "Nope"})
-        self.assertFalse(HouseholdMember.objects.filter(user=loner).exists())
 
     def test_history_lists_past_weeks_and_filters(self):
         with at(MONDAY):
@@ -344,10 +381,17 @@ class ChoreManagementTests(Base):
     def test_admin_adds_edits_and_retires_chore(self):
         self.client.force_login(self.boss)
         with at(MONDAY):
-            response = self.client.post(reverse("chore_add"), {"name": "Vacuum", "description": "Living room"}, follow=True)
+            response = self.client.post(
+                reverse("chore_add"),
+                {"name": "Vacuum", "description": "Living room"},
+                follow=True,
+            )
             self.assertContains(response, "was added")
             chore = Chore.objects.get(name="Vacuum")
-            self.client.post(reverse("chore_edit", args=[chore.pk]), {"name": "Vacuum all", "description": ""})
+            self.client.post(
+                reverse("chore_edit", args=[chore.pk]),
+                {"name": "Vacuum all", "description": ""},
+            )
             chore.refresh_from_db()
             self.assertEqual(chore.name, "Vacuum all")
             self.client.post(reverse("chore_retire", args=[chore.pk]))
@@ -358,12 +402,14 @@ class ChoreManagementTests(Base):
         self.client.force_login(self.boss)
         with at(MONDAY):
             self.chore("Trash")
-            response = self.client.post(reverse("chore_add"), {"name": "trash", "description": ""})
+            response = self.client.post(
+                reverse("chore_add"), {"name": "trash", "description": ""}
+            )
         self.assertContains(response, "already exists")
         self.assertEqual(Chore.objects.filter(household=self.household).count(), 1)
 
     def test_cannot_edit_other_households_chore(self):
-        stranger = make_user("stranger", CustomUser.Role.ADMIN)
+        stranger = make_user("stranger")
         other_house = create_household(stranger, "Other House")
         with at(MONDAY):
             foreign = create_chore(other_house, "Foreign", "")

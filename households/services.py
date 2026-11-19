@@ -1,7 +1,6 @@
 from django.db import transaction
 from django.db.models import Max
 
-from accounts.models import CustomUser
 from chores.services import on_member_joined, reassign_pending
 
 from .models import Household, HouseholdMember
@@ -9,12 +8,6 @@ from .models import Household, HouseholdMember
 
 class MemberError(Exception):
     pass
-
-
-def role_for(user):
-    if user is not None and user.role == CustomUser.Role.ADMIN:
-        return HouseholdMember.Role.ADMIN
-    return HouseholdMember.Role.MEMBER
 
 
 def next_order(household):
@@ -43,13 +36,13 @@ def create_household(user, name):
 
 
 @transaction.atomic
-def add_member(household, display_name, user):
+def add_member(household, display_name, user, role=HouseholdMember.Role.MEMBER):
     Household.objects.select_for_update().get(pk=household.pk)
     member = HouseholdMember.objects.create(
         household=household,
         user=user,
         display_name=display_name,
-        role=role_for(user),
+        role=role,
         rotation_order=next_order(household),
     )
     moved = on_member_joined(member)
@@ -57,11 +50,20 @@ def add_member(household, display_name, user):
 
 
 @transaction.atomic
-def update_member(member, display_name, user):
+def update_member(member, display_name, user, role=None):
+    Household.objects.select_for_update().get(pk=member.household_id)
     member.display_name = display_name
-    if member.role != HouseholdMember.Role.ADMIN:
-        member.user = user
-        member.role = role_for(user)
+    member.user = user
+    if role is not None:
+        if member.role == HouseholdMember.Role.ADMIN and role != HouseholdMember.Role.ADMIN:
+            admins = (
+                member.household.members.filter(is_active=True, role=HouseholdMember.Role.ADMIN)
+                .exclude(pk=member.pk)
+                .count()
+            )
+            if admins < 1:
+                raise MemberError("A household must keep at least one active Household Admin.")
+        member.role = role
     member.save()
     return member
 

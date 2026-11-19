@@ -4,7 +4,7 @@
 <div class="page-head">
     <div>
         <h1>My profile</h1>
-        <p class="muted"><span class="badge">{{ user.get_role_display }}</span> Joined {{ user.date_joined|date:"M d, Y" }}</p>
+        <p class="muted">{% if membership %}<span class="badge">{{ membership.get_role_display }}</span> {% endif %}Joined {{ user.date_joined|date:"M d, Y" }}</p>
     </div>
 </div>
 <div class="narrow">
@@ -12,10 +12,15 @@
         <h2>Account details</h2>
         <ul class="info-list">
             <li><span>Username</span><strong>{{ user.username }}</strong></li>
-            <li><span>Role</span><strong>{{ user.get_role_display }}</strong></li>
             <li><span>Full name</span><strong>{{ user.full_name }}</strong></li>
             <li><span>Email</span><strong>{{ user.email }}</strong></li>
             <li><span>Contact number</span><strong>{{ user.contact_number|default:"Not set" }}</strong></li>
+            {% if membership %}
+            <li><span>Household</span><strong>{{ membership.household.name }}</strong></li>
+            <li><span>Role in household</span><strong>{{ membership.get_role_display }}</strong></li>
+            {% else %}
+            <li><span>Household</span><strong>Not assigned yet</strong></li>
+            {% endif %}
             <li><span>Joined</span><strong>{{ user.date_joined|date:"M d, Y" }}</strong></li>
         </ul>
     </section>
@@ -29,6 +34,13 @@
         <div class="actions">
             <a class="btn-link secondary" href="{% url 'password_change' %}">Change password</a>
             <a class="btn-link secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+        </div>
+    </section>
+    <section class="card" style="border-top: 5px solid var(--danger);">
+        <h2>Danger zone</h2>
+        <p class="muted">Permanently delete your account and personal data. This cannot be undone.</p>
+        <div class="actions">
+            <a class="btn-link secondary danger" href="{% url 'account_delete' %}" style="color: var(--danger); border-color: var(--danger);">Delete my account</a>
         </div>
     </section>
 </div>

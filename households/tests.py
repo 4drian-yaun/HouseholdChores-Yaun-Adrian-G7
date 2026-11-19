@@ -2,15 +2,24 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import CustomUser
-from chores.tests import make_user
 
 from .models import HouseholdMember
 from .services import MemberError, add_member, create_household, move_member, remove_member
 
 
+def make_user(username):
+    return CustomUser.objects.create_user(
+        username=username,
+        email=f"{username}@example.com",
+        password="StrongPass123",
+        first_name=username.title(),
+        last_name="Tester",
+    )
+
+
 class MemberTests(TestCase):
     def setUp(self):
-        self.boss = make_user("boss", CustomUser.Role.ADMIN)
+        self.boss = make_user("boss")
         self.ana = make_user("ana")
         self.household = create_household(self.boss, "Casa")
         self.boss_member = self.household.members.get(user=self.boss)
@@ -39,7 +48,7 @@ class MemberTests(TestCase):
         ana, _ = add_member(self.household, "Ana", self.ana)
         add_member(self.household, "Cam", None)
         move_member(ana, "up")
-        self.assertEqual([n for n, _ in self.orders()], ["Ana", boss_name(self), "Cam"])
+        self.assertEqual([n for n, _ in self.orders()], ["Ana", self.boss_member.display_name, "Cam"])
         move_member(ana, "up")
         self.assertEqual(self.orders()[0][0], "Ana")
 
@@ -62,18 +71,23 @@ class MemberTests(TestCase):
             remove_member(self.boss_member, ana)
 
     def test_can_remove_an_admin_when_another_remains(self):
-        second = make_user("second", CustomUser.Role.ADMIN)
-        second_member, _ = add_member(self.household, "Second", second)
+        second = make_user("second")
+        second_member, _ = add_member(
+            self.household, "Second", second, role=HouseholdMember.Role.ADMIN
+        )
         remove_member(self.boss_member, second_member)
         self.boss_member.refresh_from_db()
         self.assertFalse(self.boss_member.is_active)
 
     def test_account_linked_to_one_active_profile_only(self):
         add_member(self.household, "Ana", self.ana)
-        other_boss = make_user("other", CustomUser.Role.ADMIN)
+        other_boss = make_user("other")
         other_house = create_household(other_boss, "Rival")
         self.client.force_login(other_boss)
-        response = self.client.post(reverse("member_add"), {"display_name": "Ana", "username": "ana"})
+        response = self.client.post(
+            reverse("member_add"),
+            {"display_name": "Ana", "username": "ana", "role": HouseholdMember.Role.MEMBER},
+        )
         self.assertContains(response, "already linked")
         self.assertEqual(other_house.members.count(), 1)
 
@@ -85,20 +99,36 @@ class MemberTests(TestCase):
 
     def test_unknown_username_rejected(self):
         self.client.force_login(self.boss)
-        response = self.client.post(reverse("member_add"), {"display_name": "Ghost", "username": "nobody"})
+        response = self.client.post(
+            reverse("member_add"),
+            {"display_name": "Ghost", "username": "nobody", "role": HouseholdMember.Role.MEMBER},
+        )
         self.assertContains(response, "No account has that username")
 
     def test_admin_views_add_edit_remove_flow(self):
         self.client.force_login(self.boss)
-        response = self.client.post(reverse("member_add"), {"display_name": "Ana", "username": "ANA"}, follow=True)
+        response = self.client.post(
+            reverse("member_add"),
+            {"display_name": "Ana", "username": "ANA", "role": HouseholdMember.Role.MEMBER},
+            follow=True,
+        )
         self.assertContains(response, "was added")
         member = HouseholdMember.objects.get(display_name="Ana")
         self.assertEqual(member.user, self.ana)
-        self.client.post(reverse("member_edit", args=[member.pk]), {"display_name": "Anabel", "username": ""})
+        self.assertEqual(member.role, HouseholdMember.Role.MEMBER)
+
+        # Promote Ana to ADMIN
+        self.client.post(
+            reverse("member_edit", args=[member.pk]),
+            {"display_name": "Anabel", "username": "ana", "role": HouseholdMember.Role.ADMIN},
+        )
         member.refresh_from_db()
         self.assertEqual(member.display_name, "Anabel")
-        self.assertIsNone(member.user)
-        self.assertEqual(self.client.get(reverse("member_remove", args=[member.pk])).status_code, 200)
+        self.assertEqual(member.role, HouseholdMember.Role.ADMIN)
+
+        self.assertEqual(
+            self.client.get(reverse("member_remove", args=[member.pk])).status_code, 200
+        )
         self.client.post(reverse("member_remove", args=[member.pk]))
         member.refresh_from_db()
         self.assertFalse(member.is_active)
@@ -111,19 +141,22 @@ class MemberTests(TestCase):
             self.assertContains(response, "Only a Household Admin")
 
     def test_anonymous_redirected_from_all_new_pages(self):
-        for name in ("member_list", "member_add", "chore_list", "chore_add", "history", "analytics"):
+        for name in (
+            "member_list",
+            "member_add",
+            "chore_list",
+            "chore_add",
+            "history",
+            "analytics",
+        ):
             url = reverse(name)
             self.assertRedirects(self.client.get(url), f"{reverse('login')}?next={url}")
 
     def test_cannot_touch_member_of_other_household(self):
-        other_boss = make_user("other", CustomUser.Role.ADMIN)
+        other_boss = make_user("other")
         create_household(other_boss, "Rival")
         self.client.force_login(other_boss)
         response = self.client.get(reverse("member_edit", args=[self.boss_member.pk]))
         self.assertEqual(response.status_code, 404)
         response = self.client.post(reverse("member_remove", args=[self.boss_member.pk]))
         self.assertEqual(response.status_code, 404)
-
-
-def boss_name(case):
-    return case.boss_member.display_name
