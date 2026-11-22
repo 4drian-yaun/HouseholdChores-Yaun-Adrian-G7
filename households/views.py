@@ -96,10 +96,9 @@ class MemberListView(HouseholdContextMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        members = self.request.household.members.select_related("user")
-        context["active_members"] = [m for m in members if m.is_active]
-        context["former_members"] = [m for m in members if not m.is_active]
-        context["last_order"] = len(context["active_members"])
+        active = list(self.request.household.members.filter(is_active=True).select_related("user"))
+        context["active_members"] = active
+        context["last_order"] = len(active)
         return context
 
 

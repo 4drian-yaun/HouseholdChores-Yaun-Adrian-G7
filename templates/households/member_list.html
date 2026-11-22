@@ -74,20 +74,4 @@
         </table>
     </div>
 </section>
-
-{% if former_members %}
-<section class="card animate-in">
-    <div class="card-head">
-        <div>
-            <h2>Former members ({{ former_members|length }})</h2>
-            <p class="card-sub">Removed members stay in history but are skipped in every future rotation.</p>
-        </div>
-    </div>
-    <ul class="info-list compact-info">
-        {% for m in former_members %}
-        <li><span>{{ m.display_name }}</span><strong>{% if m.user %}@{{ m.user.username }}{% else %}No account{% endif %}</strong></li>
-        {% endfor %}
-    </ul>
-</section>
-{% endif %}
 {% endblock %}
