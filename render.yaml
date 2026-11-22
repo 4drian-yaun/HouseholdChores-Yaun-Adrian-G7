@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: householdchores
+    runtime: python
+    plan: free
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn householdchores.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.2"
+      - key: DEBUG
+        value: "False"
+      - key: USE_SQLITE
+        value: "False"
+      - key: DB_SSLMODE
+        value: "require"
+      - key: SECRET_KEY
+        generateValue: true

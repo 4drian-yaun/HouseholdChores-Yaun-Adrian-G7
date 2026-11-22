@@ -54,6 +54,7 @@ python manage.py runserver
 | `SECRET_KEY` | Django secret key | `django-insecure-change-me` |
 | `DEBUG` | Enable debug mode (`True` / `False`) | `True` |
 | `ALLOWED_HOSTS` | Comma-separated allowed hostnames | `localhost,127.0.0.1` |
+| `CSRF_TRUSTED_ORIGINS` | Comma-separated HTTPS origins (e.g. `https://your-app.onrender.com`) | *(auto-set on Render)* |
 | `USE_SQLITE` | Set `True` to run locally with SQLite instead of PostgreSQL | `False` |
 | `DB_NAME` | PostgreSQL / Supabase database name | `postgres` |
 | `DB_USER` | Database username | `postgres` |
@@ -99,3 +100,13 @@ The test suite includes **84 automated tests** verifying authentication, househo
 ```bash
 python manage.py test
 ```
+
+## Deployment (Render + Supabase)
+
+Production support (`gunicorn`, `whitenoise`, `STATIC_ROOT`, `CSRF_TRUSTED_ORIGINS`, `build.sh`, and `render.yaml`) is pre-configured:
+
+1. Push the repository to GitHub.
+2. On [Render](https://render.com), create a **New Web Service** from your repository:
+   - **Build Command:** `pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate` (or `./build.sh`)
+   - **Start Command:** `gunicorn householdchores.wsgi:application`
+3. Add your environment variables (`SECRET_KEY`, `DEBUG=False`, `USE_SQLITE=False`, and your Supabase Session pooler `DB_*` credentials with `DB_SSLMODE=require`). `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` automatically include Render's `RENDER_EXTERNAL_HOSTNAME`.
