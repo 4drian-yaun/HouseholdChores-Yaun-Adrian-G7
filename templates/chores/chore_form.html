@@ -2,16 +2,40 @@
 {% block title %}{{ heading }} | HouseholdChores{% endblock %}
 {% block content %}
 <div class="narrow animate-in">
-    <section class="card">
-        <h2>{{ heading }}</h2>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">{{ submit_label }}</button>
-        </form>
-        <div class="actions">
-            <a class="btn-link secondary" href="{% url 'chore_list' %}">Back to chores</a>
+    <a class="back-link" href="{% url 'chore_list' %}">&larr; Back to chores</a>
+    <section class="card form-card">
+        <div class="form-card-head">
+            <span class="form-emblem emblem-sun" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </span>
+            <div>
+                <h1>{{ heading }}</h1>
+                <p class="muted">Recurring chores are assigned immediately for this week and rotate every Monday.</p>
+            </div>
         </div>
+        <form method="post" class="clean-form" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="form-field">
+                <label for="{{ form.name.id_for_label }}">Chore name</label>
+                {{ form.name.errors }}
+                {{ form.name }}
+                <span class="helptext">Must be unique among active chores (e.g. "Take out trash", "Vacuum living room").</span>
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.description.id_for_label }}">Details <span class="opt">(optional)</span></label>
+                {{ form.description.errors }}
+                {{ form.description }}
+                <span class="helptext">Helpful instructions so everyone completes it the same way.</span>
+            </div>
+
+            <div class="form-actions-row">
+                <a class="btn-link secondary" href="{% url 'chore_list' %}">Cancel</a>
+                <button type="submit">{{ submit_label }}</button>
+            </div>
+        </form>
     </section>
 </div>
 {% endblock %}

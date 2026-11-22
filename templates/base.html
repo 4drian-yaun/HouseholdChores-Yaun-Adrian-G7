@@ -4,13 +4,22 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#1f6f5c">
+        <meta name="theme-color" content="#1f6f5c" id="themeColorMeta">
         <title>{% block title %}HouseholdChores{% endblock %}</title>
         <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+        <script>
+            (function () {
+                var saved = localStorage.getItem("hc-theme");
+                var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+                document.documentElement.setAttribute("data-theme", theme);
+                var meta = document.getElementById("themeColorMeta");
+                if (meta) meta.setAttribute("content", theme === "dark" ? "#132924" : "#1f6f5c");
+            })();
+        </script>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8">
     </head>
     <body>
         <header class="topbar" id="topbar">
@@ -19,9 +28,15 @@
                     <img src="{% static 'img/logo.svg' %}" alt="" width="38" height="38">
                     <span>HouseholdChores</span>
                 </a>
-                <button type="button" class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
-                    <span></span><span></span><span></span>
-                </button>
+                <div class="topbar-controls">
+                    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle light / dark mode">
+                        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                    </button>
+                    <button type="button" class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+                        <span></span><span></span><span></span>
+                    </button>
+                </div>
                 <nav id="mainNav">
                     {% with current=request.resolver_match.url_name %}
                     {% if user.is_authenticated %}
@@ -60,6 +75,6 @@
             </ul>
         {% endif %}
         <main class="page">{% block content %}{% endblock %}</main>
-        <script src="{% static 'js/app.js' %}?v=4" defer></script>
+        <script src="{% static 'js/app.js' %}?v=8" defer></script>
     </body>
 </html>

@@ -6,9 +6,19 @@
         <h1>Chores</h1>
         <p class="muted">Every active chore automatically rotates to the next member each Monday.</p>
     </div>
-    <a class="btn-link btn-inline" href="{% url 'chore_add' %}">+ Add chore</a>
+    <div class="head-actions">
+        <a class="btn-sm ghost" href="{% url 'member_list' %}">Rotation order</a>
+        <a class="btn-link btn-inline" href="{% url 'chore_add' %}">+ Add chore</a>
+    </div>
 </div>
+
 <section class="card animate-in">
+    <div class="card-head">
+        <div>
+            <h2>Active chores ({{ active_chores|length }})</h2>
+            <p class="card-sub">See who has each task now and who gets it next Monday.</p>
+        </div>
+    </div>
     {% if active_chores %}
     <div class="table-wrap">
         <table>
@@ -19,7 +29,14 @@
                 {% for c in active_chores %}
                 <tr>
                     <td><strong>{{ c.name }}</strong>{% if c.description %}<small class="sub">{{ c.description }}</small>{% endif %}</td>
-                    <td>{% if c.current %}{{ c.current.member.display_name }}{% else %}&ndash;{% endif %}</td>
+                    <td>
+                        {% if c.current %}
+                        <div class="member-cell">
+                            <span class="avatar avatar-sm avatar-c{{ c.current.member.id|divisibleby:4|yesno:'3,0' }}{% if c.current.member.id|divisibleby:3 %} avatar-c2{% elif c.current.member.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ c.current.member.display_name|slice:":1"|upper }}</span>
+                            <span>{{ c.current.member.display_name }}</span>
+                        </div>
+                        {% else %}&ndash;{% endif %}
+                    </td>
                     <td>{% if c.next_member %}<span class="next-pill">&rarr; {{ c.next_member.display_name }}</span>{% else %}&ndash;{% endif %}</td>
                     <td>{% if c.current %}<span class="status {{ c.current.status|lower }}">{{ c.current.get_status_display }}</span>{% endif %}</td>
                     <td class="cell-action">
@@ -32,16 +49,28 @@
         </table>
     </div>
     {% else %}
-    <p class="empty">No chores yet. Add your first recurring chore.</p>
+    <div class="empty-box">
+        <div class="empty-emblem" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h3>No chores yet</h3>
+        <p class="muted">Add your first recurring weekly chore and it will be assigned right away.</p>
+        <a class="btn-link btn-inline" href="{% url 'chore_add' %}">+ Add chore</a>
+    </div>
     {% endif %}
 </section>
+
 {% if retired_chores %}
 <section class="card animate-in">
-    <h2>Retired chores</h2>
-    <p class="muted">Retired chores get no new assignments. Their history is kept.</p>
-    <ul class="info-list">
+    <div class="card-head">
+        <div>
+            <h2>Retired chores ({{ retired_chores|length }})</h2>
+            <p class="card-sub">Retired chores get no new assignments. Their past history is preserved.</p>
+        </div>
+    </div>
+    <ul class="info-list compact-info">
         {% for c in retired_chores %}
-        <li><span>{{ c.name }}</span><strong>Retired</strong></li>
+        <li><span>{{ c.name }}</span><strong><span class="tag">Retired</span></strong></li>
         {% endfor %}
     </ul>
 </section>

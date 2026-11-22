@@ -4,11 +4,17 @@
 <div class="page-head animate-in">
     <div>
         <h1>History</h1>
-        <p class="muted">Past weeks are read-only.</p>
+        <p class="muted">Past weeks are read-only logs of household assignments and completion times.</p>
     </div>
-</div>
-<section class="card animate-in">
     {% if weeks %}
+    <div class="head-actions">
+        <a class="btn-sm ghost" href="{% url 'analytics' %}">View analytics</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if weeks %}
+<section class="card filter-card animate-in">
     <form method="get" class="filter-form" data-auto-submit>
         <div class="filter-group">
             <label for="week">Week</label>
@@ -37,17 +43,48 @@
             {% endif %}
         </div>
     </form>
+</section>
+
+<div class="stats stats-4 stagger">
+    <div class="stat kpi-card animate-in">
+        <span class="stat-label">Assignments</span>
+        <strong class="kpi-value">{{ overview.total }}</strong>
+    </div>
+    <div class="stat kpi-card animate-in">
+        <span class="stat-label">Completed</span>
+        <strong class="kpi-value">{{ overview.done }}</strong>
+    </div>
+    <div class="stat kpi-card stat-warn animate-in">
+        <span class="stat-label">Missed</span>
+        <strong class="kpi-value">{{ overview.missed }}</strong>
+    </div>
+    <div class="stat kpi-card animate-in">
+        <span class="stat-label">Completion rate</span>
+        <strong class="kpi-value">{{ overview.percent }}%</strong>
+    </div>
+</div>
+
+<section class="card animate-in">
     <div class="history-summary">
-        <h2>Week of {{ overview.week_start|date:"M d" }} &ndash; {{ overview.week_end|date:"M d, Y" }}</h2>
+        <div>
+            <h2>Week of {{ overview.week_start|date:"M d" }} &ndash; {{ overview.week_end|date:"M d, Y" }}</h2>
+            <p class="card-sub">Read-only archived record</p>
+        </div>
         <div class="mini-stats">
             <span class="status completed">{{ overview.done }} completed</span>
             <span class="status missed">{{ overview.missed }} missed</span>
-            <span class="tag">{{ overview.percent }}% rate</span>
         </div>
     </div>
     {% include "partials/week_table.html" %}
-    {% else %}
-    <p class="empty">No past weeks yet. History appears after the first week ends.</p>
-    {% endif %}
 </section>
+{% else %}
+<section class="card analytics-empty animate-in">
+    <div class="empty-emblem" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <h2>No past weeks yet</h2>
+    <p class="muted">History appears automatically after the first Monday&ndash;Sunday week closes.</p>
+    <a class="btn-link btn-inline" href="{% url 'dashboard' %}">Back to this week's chores</a>
+</section>
+{% endif %}
 {% endblock %}

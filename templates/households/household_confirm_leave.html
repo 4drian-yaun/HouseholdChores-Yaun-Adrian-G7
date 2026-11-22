@@ -2,30 +2,38 @@
 {% block title %}Leave household | HouseholdChores{% endblock %}
 {% block content %}
 <div class="narrow animate-in">
-    <section class="card danger-card">
-        <h2>Leave "{{ request.household.name }}"?</h2>
+    <a class="back-link" href="{% url 'profile' %}">&larr; Back to profile</a>
+    <section class="card danger-card form-card">
+        <div class="form-card-head">
+            <span class="form-emblem emblem-danger" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </span>
+            <div>
+                <h1>Leave "{{ request.household.name }}"?</h1>
+                <p class="muted">Your current role: {{ request.membership.get_role_display }}</p>
+            </div>
+        </div>
         {% if is_sole_admin %}
-        <p class="muted">
-            You are currently the <strong>only active Household Admin</strong>. Per household rules, a household must always keep at least one active Admin.
-        </p>
         <p class="warning-text">
-            Please promote another member with an account to Household Admin first before leaving.
+            You are currently the <strong>only active Household Admin</strong>. Per household rules, a household must always keep at least one active Admin. Promote another member with an account to Household Admin first before leaving.
         </p>
-        <div class="actions">
-            <a class="btn-link" href="{% url 'member_list' %}">Go to Members</a>
+        <div class="form-actions-row">
             <a class="btn-link secondary" href="{% url 'profile' %}">Back to profile</a>
+            <a class="btn-link" href="{% url 'member_list' %}">Go to Members &rarr;</a>
         </div>
         {% else %}
-        <p class="muted">
-            You will be marked inactive and excluded from all future rotations. Any pending chores assigned to you this week will be handed to other active members, and your past completion history will remain in the household log.
-        </p>
+        <ul class="impact-list">
+            <li>You will be marked inactive and excluded from all future rotations.</li>
+            <li>Any pending chores assigned to you this week will be handed to other active members.</li>
+            <li>Your past completion history will remain in the household log, and you can create or join another household anytime.</li>
+        </ul>
         <form method="post">
             {% csrf_token %}
-            <button type="submit" class="danger">Yes, leave household</button>
+            <div class="form-actions-row">
+                <a class="btn-link secondary" href="{% url 'profile' %}">Cancel</a>
+                <button type="submit" class="danger">Yes, leave household</button>
+            </div>
         </form>
-        <div class="actions">
-            <a class="btn-link secondary" href="{% url 'profile' %}">Cancel</a>
-        </div>
         {% endif %}
     </section>
 </div>

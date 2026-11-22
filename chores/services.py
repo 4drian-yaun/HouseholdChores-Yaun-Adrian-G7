@@ -281,13 +281,33 @@ def analytics(household):
         row["total"] = row["done"] + row["missed"]
         row["rate"] = percent(row["done"], row["total"])
 
+    done_pct = percent(done, total)
+    missed_pct = 100 - done_pct if total else 0
+    week_count = closed.values("week_start_date").distinct().count()
+    top_members = [m["member__display_name"] for m in members if top_done > 0 and m["done"] == top_done]
+    if done_pct >= 85:
+        health_label, health_tone = "Excellent", "ok"
+    elif done_pct >= 60:
+        health_label, health_tone = "On track", "sun"
+    else:
+        health_label, health_tone = "Needs focus", "warn"
+
+    donut_circ = 414.69
+    donut_done_offset = round(donut_circ * (1 - done_pct / 100), 2)
+
     return {
         "has_data": total > 0,
         "done": done,
         "missed": missed,
         "total": total,
-        "done_pct": percent(done, total),
-        "missed_pct": 100 - percent(done, total) if total else 0,
+        "done_pct": done_pct,
+        "missed_pct": missed_pct,
+        "week_count": week_count,
+        "top_members": top_members,
+        "health_label": health_label,
+        "health_tone": health_tone,
+        "donut_circ": donut_circ,
+        "donut_done_offset": donut_done_offset,
         "members": members,
         "chores": chores,
         "weeks": weeks,

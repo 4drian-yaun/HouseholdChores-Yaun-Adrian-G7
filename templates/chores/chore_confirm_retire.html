@@ -2,16 +2,29 @@
 {% block title %}Retire chore | HouseholdChores{% endblock %}
 {% block content %}
 <div class="narrow animate-in">
-    <section class="card danger-card">
-        <h2>Retire "{{ chore.name }}"?</h2>
-        <p class="muted">It will get no new assignments and any unfinished assignment this week is removed. Past assignments stay in history.</p>
+    <a class="back-link" href="{% url 'chore_list' %}">&larr; Back to chores</a>
+    <section class="card danger-card form-card">
+        <div class="form-card-head">
+            <span class="form-emblem emblem-danger" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </span>
+            <div>
+                <h1>Retire "{{ chore.name }}"?</h1>
+                {% if chore.description %}<p class="muted">{{ chore.description }}</p>{% else %}<p class="muted">Active recurring chore</p>{% endif %}
+            </div>
+        </div>
+        <ul class="impact-list">
+            <li>This chore will receive no new assignments in future weeks.</li>
+            <li>Any unfinished pending assignment for this week will be removed.</li>
+            <li>All past assignments remain safely preserved in history and analytics.</li>
+        </ul>
         <form method="post">
             {% csrf_token %}
-            <button type="submit" class="danger">Yes, retire chore</button>
+            <div class="form-actions-row">
+                <a class="btn-link secondary" href="{% url 'chore_list' %}">Cancel</a>
+                <button type="submit" class="danger">Yes, retire chore</button>
+            </div>
         </form>
-        <div class="actions">
-            <a class="btn-link secondary" href="{% url 'chore_list' %}">Cancel</a>
-        </div>
     </section>
 </div>
 {% endblock %}

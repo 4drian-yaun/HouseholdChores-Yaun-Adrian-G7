@@ -2,16 +2,48 @@
 {% block title %}{{ heading }} | HouseholdChores{% endblock %}
 {% block content %}
 <div class="narrow animate-in">
-    <section class="card">
-        <h2>{{ heading }}</h2>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">{{ submit_label }}</button>
-        </form>
-        <div class="actions">
-            <a class="btn-link secondary" href="{% url 'member_list' %}">Back to members</a>
+    <a class="back-link" href="{% url 'member_list' %}">&larr; Back to members</a>
+    <section class="card form-card">
+        <div class="form-card-head">
+            <span class="form-emblem" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            </span>
+            <div>
+                <h1>{{ heading }}</h1>
+                <p class="muted">Members join the rotation immediately and can be linked to an account.</p>
+            </div>
         </div>
+        <form method="post" class="clean-form" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="form-field">
+                <label for="{{ form.display_name.id_for_label }}">Display name</label>
+                {{ form.display_name.errors }}
+                {{ form.display_name }}
+                <span class="helptext">Name shown on the shared chore chart and history.</span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="{{ form.username.id_for_label }}">Linked account username <span class="opt">(optional)</span></label>
+                    {{ form.username.errors }}
+                    {{ form.username }}
+                    {% if form.username.help_text %}<span class="helptext">{{ form.username.help_text }}</span>{% endif %}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.role.id_for_label }}">Household role</label>
+                    {{ form.role.errors }}
+                    {{ form.role }}
+                    <span class="helptext">Admins can manage members and chores.</span>
+                </div>
+            </div>
+
+            <div class="form-actions-row">
+                <a class="btn-link secondary" href="{% url 'member_list' %}">Cancel</a>
+                <button type="submit">{{ submit_label }}</button>
+            </div>
+        </form>
     </section>
 </div>
 {% endblock %}

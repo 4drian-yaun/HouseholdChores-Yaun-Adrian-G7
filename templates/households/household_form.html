@@ -2,17 +2,30 @@
 {% block title %}Edit household | HouseholdChores{% endblock %}
 {% block content %}
 <div class="narrow animate-in">
-    <section class="card">
-        <h2>Rename household</h2>
-        <p class="muted">Update the display name shown across the dashboard and history.</p>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Save household name</button>
-        </form>
-        <div class="actions">
-            <a class="btn-link secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+    <a class="back-link" href="{% url 'dashboard' %}">&larr; Back to dashboard</a>
+    <section class="card form-card">
+        <div class="form-card-head">
+            <span class="form-emblem" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </span>
+            <div>
+                <h1>Rename household</h1>
+                <p class="muted">Update the display name shown across the dashboard and history.</p>
+            </div>
         </div>
+        <form method="post" class="clean-form" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="form-field">
+                <label for="{{ form.name.id_for_label }}">Household name</label>
+                {{ form.name.errors }}
+                {{ form.name }}
+            </div>
+            <div class="form-actions-row">
+                <a class="btn-link secondary" href="{% url 'dashboard' %}">Cancel</a>
+                <button type="submit">Save household name</button>
+            </div>
+        </form>
     </section>
 </div>
 {% endblock %}

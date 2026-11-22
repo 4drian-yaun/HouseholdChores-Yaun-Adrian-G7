@@ -4,14 +4,38 @@
 <div class="page-head animate-in">
     <div>
         <h1>Members</h1>
-        <p class="muted">Chores rotate in the order shown below, then start over after the last person.</p>
+        <p class="muted">Chores rotate in the order shown below, then wrap back to the first person.</p>
     </div>
     <div class="head-actions">
         <a class="btn-sm ghost" href="{% url 'household_edit' %}">Rename household</a>
         <a class="btn-link btn-inline" href="{% url 'member_add' %}">+ Add member</a>
     </div>
 </div>
+
+{% if active_members %}
+<div class="rotation-chain animate-in" aria-label="Rotation sequence">
+    <span class="chain-label">Weekly rotation</span>
+    <div class="chain-items">
+        {% for m in active_members %}
+        <span class="chain-node">
+            <b>{{ m.rotation_order }}</b> {{ m.display_name }}
+        </span>
+        {% if not forloop.last %}<span class="chain-arrow" aria-hidden="true">&rarr;</span>{% endif %}
+        {% endfor %}
+        {% if active_members|length > 1 %}
+        <span class="chain-arrow" aria-hidden="true">&#8635;</span>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
 <section class="card animate-in">
+    <div class="card-head">
+        <div>
+            <h2>Active members ({{ active_members|length }})</h2>
+            <p class="card-sub">Use the arrows to adjust weekly rotation order.</p>
+        </div>
+    </div>
     <div class="table-wrap">
         <table>
             <thead>
@@ -19,7 +43,7 @@
             </thead>
             <tbody>
                 {% for m in active_members %}
-                <tr>
+                <tr class="{% if m.pk == request.membership.pk %}is-mine{% endif %}">
                     <td><span class="order-num">{{ m.rotation_order }}</span></td>
                     <td>
                         <div class="member-cell">
@@ -30,14 +54,14 @@
                             </div>
                         </div>
                     </td>
-                    <td>{% if m.user %}{{ m.user.username }}{% else %}<span class="sub">No account (cannot log in)</span>{% endif %}</td>
+                    <td>{% if m.user %}<span class="handle-pill">@{{ m.user.username }}</span>{% else %}<span class="sub">No account (cannot log in)</span>{% endif %}</td>
                     <td><span class="role-chip {{ m.role|lower }}">{{ m.get_role_display }}</span></td>
                     <td class="cell-action">
                         {% if not forloop.first %}
-                        <form method="post" action="{% url 'member_move' m.pk 'up' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move up">&uarr;</button></form>
+                        <form method="post" action="{% url 'member_move' m.pk 'up' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move up" title="Move up">&uarr;</button></form>
                         {% endif %}
                         {% if not forloop.last %}
-                        <form method="post" action="{% url 'member_move' m.pk 'down' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move down">&darr;</button></form>
+                        <form method="post" action="{% url 'member_move' m.pk 'down' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move down" title="Move down">&darr;</button></form>
                         {% endif %}
                     </td>
                     <td class="cell-action">
@@ -50,13 +74,18 @@
         </table>
     </div>
 </section>
+
 {% if former_members %}
 <section class="card animate-in">
-    <h2>Former members</h2>
-    <p class="muted">Removed members stay in history but are skipped in every future rotation.</p>
-    <ul class="info-list">
+    <div class="card-head">
+        <div>
+            <h2>Former members ({{ former_members|length }})</h2>
+            <p class="card-sub">Removed members stay in history but are skipped in every future rotation.</p>
+        </div>
+    </div>
+    <ul class="info-list compact-info">
         {% for m in former_members %}
-        <li><span>{{ m.display_name }}</span><strong>{% if m.user %}{{ m.user.username }}{% else %}No account{% endif %}</strong></li>
+        <li><span>{{ m.display_name }}</span><strong>{% if m.user %}@{{ m.user.username }}{% else %}No account{% endif %}</strong></li>
         {% endfor %}
     </ul>
 </section>

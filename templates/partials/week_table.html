@@ -3,7 +3,7 @@
     <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ overview.percent }}">
         <span class="progress-fill" data-width="{{ overview.percent }}" style="width: {{ overview.percent }}%"></span>
     </div>
-    <strong>{{ overview.done }} of {{ overview.total }} done ({{ overview.percent }}%)</strong>
+    <strong class="progress-text">{{ overview.done }} of {{ overview.total }} done <span class="pct-pill {% if overview.percent >= 80 %}ok{% elif overview.percent >= 50 %}sun{% else %}warn{% endif %}">{{ overview.percent }}%</span></strong>
 </div>
 <div class="table-wrap">
     <table class="chore-table">
@@ -22,7 +22,7 @@
                     <div class="member-cell">
                         <span class="avatar avatar-c{{ a.member.id|divisibleby:4|yesno:'3,0' }}{% if a.member.id|divisibleby:3 %} avatar-c2{% elif a.member.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ a.member.display_name|slice:":1"|upper }}</span>
                         <div>
-                            <span>{{ a.member.display_name }}</span>
+                            <span class="member-name">{{ a.member.display_name }}</span>
                             {% if a.is_mine %} <span class="tag tag-me">you</span>{% endif %}
                             {% if not a.member.is_active %} <span class="tag">removed</span>{% endif %}
                             {% if not a.member.user_id %}<small class="sub">No login</small>{% endif %}
@@ -30,7 +30,7 @@
                     </div>
                 </td>
                 <td><span class="status {{ a.status|lower }}">{{ a.get_status_display }}</span></td>
-                <td>{% if a.completed_at %}{{ a.completed_at|date:"M d, g:i A" }}{% else %}&ndash;{% endif %}</td>
+                <td class="muted-cell">{% if a.completed_at %}{{ a.completed_at|date:"M d, g:i A" }}{% else %}&ndash;{% endif %}</td>
                 <td class="cell-action">
                     {% if a.can_complete %}
                     <form method="post" action="{% url 'assignment_complete' a.pk %}" class="inline">
@@ -45,5 +45,14 @@
     </table>
 </div>
 {% else %}
-<p class="empty">No chores for this week yet.</p>
+<div class="empty-box">
+    <div class="empty-emblem" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
+    <h3>No chores for this week yet</h3>
+    <p class="muted">Add recurring chores so everyone knows what to do this week.</p>
+    {% if is_household_admin %}
+    <a class="btn-link btn-inline" href="{% url 'chore_add' %}">+ Add first chore</a>
+    {% endif %}
+</div>
 {% endif %}

@@ -4,47 +4,97 @@
 <div class="page-head animate-in">
     <div>
         <h1>My profile</h1>
-        <p class="muted">{% if membership %}<span class="badge">{{ membership.get_role_display }}</span> {% endif %}Joined {{ user.date_joined|date:"M d, Y" }}</p>
+        <p class="muted">Manage your personal details, password, and household membership.</p>
+    </div>
+    <div class="head-actions">
+        <a class="btn-sm ghost" href="{% url 'password_change' %}">Change password</a>
+        <a class="btn-link btn-inline" href="{% url 'dashboard' %}">Dashboard</a>
     </div>
 </div>
-<div class="narrow stagger">
-    <section class="card animate-in">
-        <h2>Account details</h2>
-        <ul class="info-list">
-            <li><span>Username</span><strong>{{ user.username }}</strong></li>
-            <li><span>Full name</span><strong>{{ user.full_name }}</strong></li>
-            <li><span>Email</span><strong>{{ user.email }}</strong></li>
-            <li><span>Contact number</span><strong>{{ user.contact_number|default:"Not set" }}</strong></li>
-            {% if membership %}
-            <li><span>Household</span><strong>{{ membership.household.name }}</strong></li>
-            <li><span>Role in household</span><strong>{{ membership.get_role_display }}</strong></li>
-            {% else %}
-            <li><span>Household</span><strong>Not assigned yet</strong></li>
-            {% endif %}
-            <li><span>Joined</span><strong>{{ user.date_joined|date:"M d, Y" }}</strong></li>
-        </ul>
-    </section>
-    <section class="card animate-in">
-        <h2>Edit profile</h2>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Save changes</button>
-        </form>
-        <div class="actions">
+
+<div class="profile-grid stagger">
+    <div class="profile-side">
+        <section class="card profile-hero-card animate-in">
+            <div class="profile-identity">
+                <span class="avatar avatar-lg" aria-hidden="true">{{ user.full_name|slice:":1"|upper }}</span>
+                <div>
+                    <h2>{{ user.full_name }}</h2>
+                    <p class="profile-handle">@{{ user.username }}</p>
+                    {% if membership %}
+                    <span class="badge">{{ membership.get_role_display }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <ul class="info-list compact-info">
+                <li><span>Email</span><strong>{{ user.email }}</strong></li>
+                <li><span>Contact number</span><strong>{{ user.contact_number|default:"Not set" }}</strong></li>
+                {% if membership %}
+                <li><span>Household</span><strong>{{ membership.household.name }}</strong></li>
+                <li><span>Role</span><strong>{{ membership.get_role_display }}</strong></li>
+                {% else %}
+                <li><span>Household</span><strong>Not assigned yet</strong></li>
+                {% endif %}
+                <li><span>Joined</span><strong>{{ user.date_joined|date:"M d, Y" }}</strong></li>
+            </ul>
             <a class="btn-link secondary" href="{% url 'password_change' %}">Change password</a>
-            <a class="btn-link secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+        </section>
+
+        <section class="card danger-card animate-in">
+            <h3>Danger zone</h3>
+            <p class="muted">Leave your current household or permanently delete your account.</p>
+            <div class="actions">
+                {% if membership %}
+                <a class="btn-link secondary danger-outline" href="{% url 'household_leave' %}">Leave "{{ membership.household.name }}"</a>
+                {% endif %}
+                <a class="btn-link secondary danger-outline" href="{% url 'account_delete' %}">Delete my account</a>
+            </div>
+        </section>
+    </div>
+
+    <section class="card form-card animate-in">
+        <div class="form-card-head">
+            <span class="form-emblem" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <div>
+                <h2>Edit profile</h2>
+                <p class="muted">Keep your name and contact details up to date.</p>
+            </div>
         </div>
-    </section>
-    <section class="card danger-card animate-in">
-        <h2>Danger zone</h2>
-        <p class="muted">Manage leaving your household or permanently deleting your account.</p>
-        <div class="actions">
-            {% if membership %}
-            <a class="btn-link secondary danger-outline" href="{% url 'household_leave' %}">Leave "{{ membership.household.name }}"</a>
-            {% endif %}
-            <a class="btn-link secondary danger-outline" href="{% url 'account_delete' %}">Delete my account</a>
-        </div>
+        <form method="post" class="clean-form" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="{{ form.first_name.id_for_label }}">First name</label>
+                    {{ form.first_name.errors }}
+                    {{ form.first_name }}
+                </div>
+                <div class="form-field">
+                    <label for="{{ form.last_name.id_for_label }}">Last name</label>
+                    {{ form.last_name.errors }}
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.email.id_for_label }}">Email address</label>
+                {{ form.email.errors }}
+                {{ form.email }}
+            </div>
+
+            <div class="form-field">
+                <label for="{{ form.contact_number.id_for_label }}">Contact number <span class="opt">(optional)</span></label>
+                {{ form.contact_number.errors }}
+                {{ form.contact_number }}
+            </div>
+
+            <div class="form-actions-row">
+                <a class="btn-link secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+                <button type="submit">Save changes</button>
+            </div>
+        </form>
     </section>
 </div>
 {% endblock %}

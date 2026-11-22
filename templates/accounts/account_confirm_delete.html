@@ -2,25 +2,42 @@
 {% block title %}Delete account | HouseholdChores{% endblock %}
 {% block content %}
 <div class="narrow animate-in">
-    <section class="card danger-card">
-        <h2>Delete your account?</h2>
-        <p class="muted">
-            This will permanently delete your account (<strong>{{ user.username }}</strong>).
-            {% if membership %}
-                You will be removed from <strong>{{ membership.household.name }}</strong> and your pending chores will be handed over to your roommates.
-            {% endif %}
-        </p>
-        <p style="color: var(--danger); font-weight: 700;">
-            Warning: This action cannot be undone. All personal account details will be permanently removed.
-        </p>
-        <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="danger">Permanently delete my account</button>
-        </form>
-        <div class="actions">
-            <a class="btn-link secondary" href="{% url 'profile' %}">Cancel and keep account</a>
+    <a class="back-link" href="{% url 'profile' %}">&larr; Back to profile</a>
+    <section class="card danger-card form-card">
+        <div class="form-card-head">
+            <span class="form-emblem emblem-danger" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </span>
+            <div>
+                <h1>Delete your account?</h1>
+                <p class="muted">Account: <strong>@{{ user.username }}</strong></p>
+            </div>
         </div>
+
+        <ul class="impact-list">
+            <li>Your login account and personal details will be permanently removed.</li>
+            {% if membership %}
+            <li>You will be removed from <strong>{{ membership.household.name }}</strong> and any pending chores will be handed to your roommates.</li>
+            {% endif %}
+            <li>This action cannot be undone.</li>
+        </ul>
+
+        <form method="post" class="clean-form" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="form-field">
+                <label for="{{ form.password.id_for_label }}">Enter your password to confirm</label>
+                {{ form.password.errors }}
+                <div class="pw-wrap">
+                    {{ form.password }}
+                    <button type="button" class="pw-eye" data-pw-toggle aria-label="Show password"></button>
+                </div>
+            </div>
+            <div class="form-actions-row">
+                <a class="btn-link secondary" href="{% url 'profile' %}">Cancel</a>
+                <button type="submit" class="danger">Permanently delete</button>
+            </div>
+        </form>
     </section>
 </div>
 {% endblock %}
