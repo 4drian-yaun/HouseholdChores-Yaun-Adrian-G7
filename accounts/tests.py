@@ -58,6 +58,12 @@ class RegistrationTests(TestCase):
         self.client.post(reverse("signup"), self.payload())
         self.assertEqual(CustomUser.objects.count(), 1)
 
+    def test_duplicate_username_case_insensitive(self):
+        make_user("newuser")
+        response = self.client.post(reverse("signup"), self.payload(username="NewUser"))
+        self.assertEqual(CustomUser.objects.count(), 1)
+        self.assertContains(response, "already exists")
+
     def test_duplicate_email_case_insensitive(self):
         make_user("other", email="new@example.com")
         response = self.client.post(reverse("signup"), self.payload(email="NEW@example.com"))
@@ -102,6 +108,15 @@ class AccessControlTests(TestCase):
     def test_logged_in_user_sees_dashboard(self):
         self.client.force_login(self.boss)
         self.assertEqual(self.client.get(reverse("dashboard")).status_code, 200)
+
+    def test_landing_page_for_guests_and_redirects_logged_in_users(self):
+        guest = self.client.get(reverse("home"))
+        self.assertEqual(guest.status_code, 200)
+        self.assertContains(guest, "Who's doing what this week?")
+        self.client.force_login(self.boss)
+        self.assertRedirects(
+            self.client.get(reverse("home")), reverse("dashboard"), fetch_redirect_response=False
+        )
 
     def test_logged_in_user_redirected_from_signup_and_login(self):
         self.client.force_login(self.member)

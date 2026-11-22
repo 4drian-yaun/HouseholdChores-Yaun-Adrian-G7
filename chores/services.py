@@ -111,6 +111,7 @@ def on_member_joined(member):
     this_week = current_week_start()
     if Assignment.objects.filter(member=member, week_start_date=this_week).exists():
         return None
+    load = week_load(member.household, this_week)
     pending = (
         Assignment.objects.filter(
             chore__household=member.household,
@@ -126,8 +127,8 @@ def on_member_joined(member):
         grouped.setdefault(assignment.member_id, []).append(assignment)
     if not grouped:
         return None
-    donor = max(grouped, key=lambda key: len(grouped[key]))
-    if len(grouped[donor]) < 2:
+    donor = max(grouped, key=lambda key: (load.get(key, 0), len(grouped[key])))
+    if load.get(donor, 0) < 2:
         return None
     moved = grouped[donor][-1]
     moved.member = member
@@ -188,25 +189,36 @@ def complete_assignment(membership, assignment):
     return assignment
 
 
-def week_overview(household, membership, week=None):
+def week_overview(household, membership, week=None, member_id=None):
     week = week or current_week_start()
-    assignments = list(
+    qs = (
         Assignment.objects.filter(chore__household=household, week_start_date=week)
         .select_related("chore", "member")
         .order_by("chore__name")
     )
+    if member_id:
+        qs = qs.filter(member_id=member_id)
+    assignments = list(qs)
     for assignment in assignments:
         assignment.can_complete = completion_block_reason(membership, assignment) is None
+        assignment.is_mine = assignment.member_id == membership.id
     total = len(assignments)
     done = sum(1 for a in assignments if a.status == Assignment.Status.COMPLETED)
+    missed = sum(1 for a in assignments if a.status == Assignment.Status.MISSED)
+    pending = sum(1 for a in assignments if a.status == Assignment.Status.PENDING)
+    today = timezone.localdate()
+    week_end = week + timedelta(days=6)
+    days_left = max((week_end - today).days, 0)
     return {
         "assignments": assignments,
         "total": total,
         "done": done,
-        "pending": sum(1 for a in assignments if a.status == Assignment.Status.PENDING),
+        "missed": missed,
+        "pending": pending,
         "percent": round(done * 100 / total) if total else 0,
         "week_start": week,
-        "week_end": week + timedelta(days=6),
+        "week_end": week_end,
+        "days_left": days_left,
     }
 
 

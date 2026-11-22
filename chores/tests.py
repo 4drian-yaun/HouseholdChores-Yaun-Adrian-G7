@@ -141,6 +141,18 @@ class RotationTests(Base):
             Assignment.objects.filter(member=member, week_start_date=MONDAY).count(), 1
         )
 
+    def test_new_member_mid_week_takes_pending_when_donor_completed_another(self):
+        solo = make_user("solo2")
+        household = create_household(solo, "Solo House 2")
+        solo_member = household.members.get(user=solo)
+        with at(MONDAY):
+            c1 = create_chore(household, "A", "")
+            create_chore(household, "B", "")
+            complete_assignment(solo_member, Assignment.objects.get(chore=c1))
+            member, moved = add_member(household, "Joiner", None)
+        self.assertIsNotNone(moved)
+        self.assertEqual(moved.member_id, member.id)
+
     def test_removed_member_chores_move_and_rotation_skips_them(self):
         with at(MONDAY):
             for name in ("A", "B", "C"):
@@ -317,6 +329,7 @@ class DashboardHistoryAnalyticsTests(Base):
     def test_history_lists_past_weeks_and_filters(self):
         with at(MONDAY):
             self.chore("Trash")
+            self.chore("Dishes")
         with at(MONDAY + timedelta(days=7)):
             sync_household(self.household)
             self.client.force_login(self.boss)
@@ -325,8 +338,20 @@ class DashboardHistoryAnalyticsTests(Base):
             self.assertContains(response, "Missed")
             filtered = self.client.get(reverse("history"), {"week": "2026-11-16"})
             self.assertContains(filtered, "Trash")
+            by_member = self.client.get(
+                reverse("history"), {"week": "2026-11-16", "member": str(self.boss_member.pk)}
+            )
+            self.assertEqual(by_member.status_code, 200)
             bad = self.client.get(reverse("history"), {"week": "garbage"})
             self.assertEqual(bad.status_code, 200)
+
+    def test_chore_list_shows_next_monday_rotation_preview(self):
+        self.client.force_login(self.boss)
+        with at(MONDAY):
+            self.chore("Trash")
+            response = self.client.get(reverse("chore_list"))
+        self.assertContains(response, "Next Monday")
+        self.assertContains(response, "Ana")
 
     def test_history_empty_state(self):
         self.client.force_login(self.boss)

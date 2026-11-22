@@ -1,25 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Chores | HouseholdChores{% endblock %}
 {% block content %}
-<div class="page-head">
+<div class="page-head animate-in">
     <div>
         <h1>Chores</h1>
-        <p class="muted">Every active chore moves to the next member each Monday.</p>
+        <p class="muted">Every active chore automatically rotates to the next member each Monday.</p>
     </div>
-    <a class="btn-link btn-inline" href="{% url 'chore_add' %}">Add chore</a>
+    <a class="btn-link btn-inline" href="{% url 'chore_add' %}">+ Add chore</a>
 </div>
-<section class="card">
+<section class="card animate-in">
     {% if active_chores %}
     <div class="table-wrap">
         <table>
             <thead>
-                <tr><th>Chore</th><th>This week</th><th>Status</th><th></th></tr>
+                <tr><th>Chore</th><th>This week</th><th>Next Monday</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
                 {% for c in active_chores %}
                 <tr>
                     <td><strong>{{ c.name }}</strong>{% if c.description %}<small class="sub">{{ c.description }}</small>{% endif %}</td>
                     <td>{% if c.current %}{{ c.current.member.display_name }}{% else %}&ndash;{% endif %}</td>
+                    <td>{% if c.next_member %}<span class="next-pill">&rarr; {{ c.next_member.display_name }}</span>{% else %}&ndash;{% endif %}</td>
                     <td>{% if c.current %}<span class="status {{ c.current.status|lower }}">{{ c.current.get_status_display }}</span>{% endif %}</td>
                     <td class="cell-action">
                         <a class="btn-sm ghost" href="{% url 'chore_edit' c.pk %}">Edit</a>
@@ -35,7 +36,7 @@
     {% endif %}
 </section>
 {% if retired_chores %}
-<section class="card">
+<section class="card animate-in">
     <h2>Retired chores</h2>
     <p class="muted">Retired chores get no new assignments. Their history is kept.</p>
     <ul class="info-list">

@@ -2,42 +2,72 @@
 {% block title %}Dashboard | HouseholdChores{% endblock %}
 {% block content %}
 {% if not membership %}
-<div class="narrow">
-    <section class="card">
+<div class="narrow stagger">
+    <section class="card animate-in">
         <h2>Create your household</h2>
-        <p class="muted">Welcome, {{ user.first_name|default:user.username }}! Name your household to get started. You will be its Household Admin.</p>
+        <p class="muted">Welcome, {{ user.first_name|default:user.username }}! Name your household to get started. You will automatically become its Household Admin.</p>
         <form method="post" action="{% url 'household_create' %}">
             {% csrf_token %}
             {{ household_form.as_p }}
             <button type="submit">Create household</button>
         </form>
     </section>
-    <section class="card" style="margin-top: 18px;">
+    <section class="card animate-in">
         <h3>Waiting to join an existing household?</h3>
         <p class="muted">Give your username to your Household Admin so they can add you:</p>
-        <p class="callout">{{ user.username }}</p>
+        <div class="copy-row">
+            <p class="callout" id="usernameCallout">{{ user.username }}</p>
+            <button type="button" class="btn-sm ghost copy-btn" data-copy="{{ user.username }}">Copy</button>
+        </div>
         <div class="actions">
             <a class="btn-link secondary" href="{% url 'profile' %}">My profile</a>
         </div>
     </section>
 </div>
 {% else %}
-<div class="page-head">
+<div class="page-head animate-in">
     <div>
         <h1>{{ household.name }}</h1>
-        <p class="muted"><span class="badge">{{ membership.get_role_display }}</span> Week of {{ overview.week_start|date:"M d" }} &ndash; {{ overview.week_end|date:"M d, Y" }}</p>
+        <p class="muted">
+            <span class="badge">{{ membership.get_role_display }}</span>
+            Week of {{ overview.week_start|date:"M d" }} &ndash; {{ overview.week_end|date:"M d, Y" }}
+            <span class="pill-countdown">{% if overview.days_left == 0 %}Due tonight{% elif overview.days_left == 1 %}1 day left{% else %}{{ overview.days_left }} days left{% endif %}</span>
+        </p>
     </div>
+    {% if is_admin %}
+    <div class="head-actions">
+        <a class="btn-sm ghost" href="{% url 'household_edit' %}">Rename household</a>
+        <a class="btn-link btn-inline" href="{% url 'chore_add' %}">+ Add chore</a>
+    </div>
+    {% endif %}
 </div>
-{% if is_admin %}
-<div class="stats">
-    <div class="stat"><span>Active members</span><strong>{{ member_count }}</strong></div>
-    <div class="stat"><span>Active chores</span><strong>{{ chore_count }}</strong></div>
-    <div class="stat"><span>Done this week</span><strong>{{ overview.done }}/{{ overview.total }}</strong></div>
+
+<div class="stats stagger">
+    {% if is_admin %}
+    <div class="stat animate-in"><span>Active members</span><strong data-count="{{ member_count }}">{{ member_count }}</strong></div>
+    <div class="stat animate-in"><span>Active chores</span><strong data-count="{{ chore_count }}">{{ chore_count }}</strong></div>
+    <div class="stat animate-in"><span>Done this week</span><strong><span data-count="{{ overview.done }}">{{ overview.done }}</span>/{{ overview.total }}</strong></div>
+    {% else %}
+    <div class="stat animate-in"><span>Your pending chores</span><strong data-count="{{ my_pending_count }}">{{ my_pending_count }}</strong></div>
+    <div class="stat animate-in"><span>Household progress</span><strong><span data-count="{{ overview.percent }}">{{ overview.percent }}</span>%</strong></div>
+    <div class="stat animate-in"><span>Done this week</span><strong><span data-count="{{ overview.done }}">{{ overview.done }}</span>/{{ overview.total }}</strong></div>
+    {% endif %}
 </div>
-{% endif %}
-<section class="card">
-    <h2>This week's chores</h2>
+
+<section class="card animate-in">
+    <div class="card-head">
+        <h2>This week's chores</h2>
+        {% if overview.assignments %}
+        <div class="filter-pills" role="group" aria-label="Filter chores" data-chore-filter>
+            <button type="button" class="pill active" data-filter="all">All ({{ overview.total }})</button>
+            <button type="button" class="pill" data-filter="mine">Assigned to me</button>
+            <button type="button" class="pill" data-filter="pending">Pending ({{ overview.pending }})</button>
+            <button type="button" class="pill" data-filter="completed">Done ({{ overview.done }})</button>
+        </div>
+        {% endif %}
+    </div>
     {% include "partials/week_table.html" %}
+    <p class="empty filter-empty" hidden>No chores match this filter.</p>
     <div class="quick-links">
         {% if is_admin %}
         <a class="btn-link secondary" href="{% url 'member_list' %}">Manage members</a>

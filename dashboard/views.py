@@ -9,6 +9,15 @@ from households.models import HouseholdMember
 from households.utils import get_membership
 
 
+class HomeView(TemplateView):
+    template_name = "dashboard/landing.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect("dashboard")
+        return super().dispatch(request, *args, **kwargs)
+
+
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "dashboard/dashboard.html"
 
@@ -21,10 +30,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             return context
         household = membership.household
         sync_household(household)
+        overview = week_overview(household, membership)
         context["household"] = household
-        context["overview"] = week_overview(household, membership)
+        context["overview"] = overview
         context["member_count"] = household.members.filter(is_active=True).count()
         context["chore_count"] = household.chores.filter(is_active=True).count()
+        context["my_pending_count"] = sum(
+            1 for a in overview["assignments"] if a.is_mine and a.status == "PENDING"
+        )
         context["is_admin"] = membership.role == HouseholdMember.Role.ADMIN
         return context
 

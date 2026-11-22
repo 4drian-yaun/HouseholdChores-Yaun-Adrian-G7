@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Leave household | HouseholdChores{% endblock %}
+{% block content %}
+<div class="narrow animate-in">
+    <section class="card danger-card">
+        <h2>Leave "{{ request.household.name }}"?</h2>
+        {% if is_sole_admin %}
+        <p class="muted">
+            You are currently the <strong>only active Household Admin</strong>. Per household rules, a household must always keep at least one active Admin.
+        </p>
+        <p class="warning-text">
+            Please promote another member with an account to Household Admin first before leaving.
+        </p>
+        <div class="actions">
+            <a class="btn-link" href="{% url 'member_list' %}">Go to Members</a>
+            <a class="btn-link secondary" href="{% url 'profile' %}">Back to profile</a>
+        </div>
+        {% else %}
+        <p class="muted">
+            You will be marked inactive and excluded from all future rotations. Any pending chores assigned to you this week will be handed to other active members, and your past completion history will remain in the household log.
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="danger">Yes, leave household</button>
+        </form>
+        <div class="actions">
+            <a class="btn-link secondary" href="{% url 'profile' %}">Cancel</a>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

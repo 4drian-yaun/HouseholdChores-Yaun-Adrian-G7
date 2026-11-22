@@ -1,24 +1,50 @@
 {% extends "base.html" %}
 {% block title %}History | HouseholdChores{% endblock %}
 {% block content %}
-<div class="page-head">
+<div class="page-head animate-in">
     <div>
         <h1>History</h1>
         <p class="muted">Past weeks are read-only.</p>
     </div>
 </div>
-<section class="card">
+<section class="card animate-in">
     {% if weeks %}
-    <form method="get" class="filter-form">
-        <label for="week">Week</label>
-        <select name="week" id="week">
-            {% for w in weeks %}
-            <option value="{{ w|date:'Y-m-d' }}" {% if w == selected %}selected{% endif %}>{{ w|date:"M d, Y" }}</option>
-            {% endfor %}
-        </select>
+    <form method="get" class="filter-form" data-auto-submit>
+        <div class="filter-group">
+            <label for="week">Week</label>
+            <select name="week" id="week">
+                {% for w in weeks %}
+                <option value="{{ w|date:'Y-m-d' }}" {% if w == selected %}selected{% endif %}>{{ w|date:"M d, Y" }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="member">Member</label>
+            <select name="member" id="member">
+                <option value="">All members</option>
+                {% for m in members %}
+                <option value="{{ m.pk }}" {% if m.pk == selected_member %}selected{% endif %}>{{ m.display_name }}{% if not m.is_active %} (removed){% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
         <button type="submit" class="btn-sm">Show</button>
+        <div class="week-pager">
+            {% if prev_week %}
+            <a class="btn-sm ghost" href="?week={{ prev_week|date:'Y-m-d' }}{% if selected_member %}&amp;member={{ selected_member }}{% endif %}">&larr; Older</a>
+            {% endif %}
+            {% if next_week %}
+            <a class="btn-sm ghost" href="?week={{ next_week|date:'Y-m-d' }}{% if selected_member %}&amp;member={{ selected_member }}{% endif %}">Newer &rarr;</a>
+            {% endif %}
+        </div>
     </form>
-    <h2>Week of {{ overview.week_start|date:"M d" }} &ndash; {{ overview.week_end|date:"M d, Y" }}</h2>
+    <div class="history-summary">
+        <h2>Week of {{ overview.week_start|date:"M d" }} &ndash; {{ overview.week_end|date:"M d, Y" }}</h2>
+        <div class="mini-stats">
+            <span class="status completed">{{ overview.done }} completed</span>
+            <span class="status missed">{{ overview.missed }} missed</span>
+            <span class="tag">{{ overview.percent }}% rate</span>
+        </div>
+    </div>
     {% include "partials/week_table.html" %}
     {% else %}
     <p class="empty">No past weeks yet. History appears after the first week ends.</p>

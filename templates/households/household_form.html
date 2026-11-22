@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Edit household | HouseholdChores{% endblock %}
+{% block content %}
+<div class="narrow animate-in">
+    <section class="card">
+        <h2>Rename household</h2>
+        <p class="muted">Update the display name shown across the dashboard and history.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save household name</button>
+        </form>
+        <div class="actions">
+            <a class="btn-link secondary" href="{% url 'dashboard' %}">Back to dashboard</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

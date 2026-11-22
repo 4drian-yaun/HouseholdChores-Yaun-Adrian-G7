@@ -13,6 +13,7 @@ from .services import (
     MemberError,
     add_member,
     create_household,
+    leave_household,
     move_member,
     remove_member,
     update_member,
@@ -35,6 +36,57 @@ class CreateHouseholdView(LoginRequiredMixin, View):
         messages.success(
             request, f'Household "{household.name}" created. Add your members and chores next.'
         )
+        return redirect("dashboard")
+
+
+class HouseholdEditView(HouseholdContextMixin, FormView):
+    admin_only = True
+    form_class = HouseholdForm
+    template_name = "households/household_form.html"
+    success_url = reverse_lazy("dashboard")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["instance"] = self.request.household
+        return kwargs
+
+    def form_valid(self, form):
+        household = form.save()
+        messages.success(self.request, f'Household renamed to "{household.name}".')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Household name not saved. Please fix the errors below.")
+        return super().form_invalid(form)
+
+
+class LeaveHouseholdView(HouseholdContextMixin, TemplateView):
+    template_name = "households/household_confirm_leave.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        membership = self.request.membership
+        is_sole_admin = (
+            membership.role == HouseholdMember.Role.ADMIN
+            and not self.request.household.members.filter(
+                is_active=True, role=HouseholdMember.Role.ADMIN
+            )
+            .exclude(pk=membership.pk)
+            .exists()
+        )
+        context["is_sole_admin"] = is_sole_admin
+        return context
+
+    def post(self, request):
+        household_name = request.household.name
+        try:
+            reassigned = leave_household(request.membership)
+        except MemberError as error:
+            messages.error(request, str(error))
+            return redirect("household_leave")
+        messages.success(request, f'You have left "{household_name}".')
+        if reassigned:
+            messages.info(request, f"{reassigned} pending chore(s) were handed to other members.")
         return redirect("dashboard")
 
 

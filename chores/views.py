@@ -12,10 +12,12 @@ from .forms import ChoreForm
 from .models import Assignment, Chore
 from .services import (
     CompletionError,
+    active_members,
     analytics,
     complete_assignment,
     create_chore,
     current_week_start,
+    next_in_rotation,
     past_weeks,
     retire_chore,
     week_overview,
@@ -36,9 +38,14 @@ class ChoreListView(HouseholdContextMixin, TemplateView):
                 chore__household=household, week_start_date=week
             ).select_related("member")
         }
+        members = active_members(household)
         chores = list(household.chores.all())
         for chore in chores:
             chore.current = current.get(chore.id)
+            if chore.is_active and chore.current and members:
+                chore.next_member = next_in_rotation(chore.current.member, members, chore)
+            else:
+                chore.next_member = None
         context["active_chores"] = [c for c in chores if c.is_active]
         context["retired_chores"] = [c for c in chores if not c.is_active]
         return context
@@ -155,10 +162,33 @@ class HistoryView(HouseholdContextMixin, TemplateView):
                 selected = parsed
         if selected is None and weeks:
             selected = weeks[0]
+
+        member_id = None
+        raw_member = self.request.GET.get("member", "")
+        if raw_member.isdigit():
+            parsed_id = int(raw_member)
+            if household.members.filter(pk=parsed_id).exists():
+                member_id = parsed_id
+
+        prev_week = None
+        next_week = None
+        if selected and weeks:
+            idx = weeks.index(selected)
+            if idx + 1 < len(weeks):
+                prev_week = weeks[idx + 1]
+            if idx - 1 >= 0:
+                next_week = weeks[idx - 1]
+
         context["weeks"] = weeks
         context["selected"] = selected
+        context["prev_week"] = prev_week
+        context["next_week"] = next_week
+        context["members"] = list(household.members.order_by("-is_active", "display_name"))
+        context["selected_member"] = member_id
         if selected:
-            context["overview"] = week_overview(household, self.request.membership, selected)
+            context["overview"] = week_overview(
+                household, self.request.membership, selected, member_id=member_id
+            )
         return context
 
 

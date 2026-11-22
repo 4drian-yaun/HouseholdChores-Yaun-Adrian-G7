@@ -100,3 +100,24 @@ def remove_member(member, actor):
     member.save(update_fields=["is_active", "rotation_order"])
     compact_orders(member.household)
     return reassigned
+
+
+@transaction.atomic
+def leave_household(membership):
+    Household.objects.select_for_update().get(pk=membership.household_id)
+    if membership.role == HouseholdMember.Role.ADMIN:
+        other_admins = (
+            membership.household.members.filter(is_active=True, role=HouseholdMember.Role.ADMIN)
+            .exclude(pk=membership.pk)
+            .count()
+        )
+        if other_admins < 1:
+            raise MemberError(
+                "You are the only active Household Admin. Promote another member to Admin before leaving."
+            )
+    reassigned = reassign_pending(membership)
+    membership.is_active = False
+    membership.rotation_order = None
+    membership.save(update_fields=["is_active", "rotation_order"])
+    compact_orders(membership.household)
+    return reassigned

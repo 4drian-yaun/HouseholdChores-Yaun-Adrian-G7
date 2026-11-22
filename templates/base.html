@@ -10,46 +10,56 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4">
     </head>
     <body>
-        <header class="topbar">
+        <header class="topbar" id="topbar">
             <div class="topbar-inner">
-                <a class="brand" href="{% url 'dashboard' %}">
+                <a class="brand" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">
                     <img src="{% static 'img/logo.svg' %}" alt="" width="38" height="38">
                     <span>HouseholdChores</span>
                 </a>
-                <nav>
+                <button type="button" class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+                <nav id="mainNav">
+                    {% with current=request.resolver_match.url_name %}
                     {% if user.is_authenticated %}
                         <span class="greeting">Hi, {{ user.username }}!</span>
-                        <a href="{% url 'dashboard' %}">Dashboard</a>
+                        <a href="{% url 'dashboard' %}" class="{% if current == 'dashboard' %}active{% endif %}">Dashboard</a>
                         {% if is_household_admin %}
-                            <a href="{% url 'member_list' %}">Members</a>
-                            <a href="{% url 'chore_list' %}">Chores</a>
+                            <a href="{% url 'member_list' %}" class="{% if current == 'member_list' or current == 'member_add' or current == 'member_edit' or current == 'member_remove' %}active{% endif %}">Members</a>
+                            <a href="{% url 'chore_list' %}" class="{% if current == 'chore_list' or current == 'chore_add' or current == 'chore_edit' or current == 'chore_retire' %}active{% endif %}">Chores</a>
                         {% endif %}
                         {% if membership %}
-                            <a href="{% url 'history' %}">History</a>
-                            <a href="{% url 'analytics' %}">Analytics</a>
+                            <a href="{% url 'history' %}" class="{% if current == 'history' %}active{% endif %}">History</a>
+                            <a href="{% url 'analytics' %}" class="{% if current == 'analytics' %}active{% endif %}">Analytics</a>
                         {% endif %}
-                        <a href="{% url 'profile' %}">Profile</a>
+                        <a href="{% url 'profile' %}" class="{% if current == 'profile' or current == 'password_change' or current == 'account_delete' %}active{% endif %}">Profile</a>
                         <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <button type="submit">Log out</button>
                         </form>
                     {% else %}
-                        <a href="{% url 'login' %}">Log in</a>
+                        <a href="{% url 'home' %}" class="{% if current == 'home' %}active{% endif %}">Home</a>
+                        <a href="{% url 'login' %}" class="{% if current == 'login' %}active{% endif %}">Log in</a>
                         <a class="nav-cta" href="{% url 'signup' %}">Sign up</a>
                     {% endif %}
+                    {% endwith %}
                 </nav>
             </div>
         </header>
         {% if messages %}
-            <ul class="messages">
+            <ul class="messages" role="status" aria-live="polite">
                 {% for message in messages %}
-                    <li class="{{ message.tags }}">{{ message }}</li>
+                    <li class="{{ message.tags }}">
+                        <span class="msg-text">{{ message }}</span>
+                        <button type="button" class="msg-close" aria-label="Dismiss">&times;</button>
+                    </li>
                 {% endfor %}
             </ul>
         {% endif %}
         <main class="page">{% block content %}{% endblock %}</main>
+        <script src="{% static 'js/app.js' %}?v=4" defer></script>
     </body>
 </html>

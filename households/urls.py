@@ -2,6 +2,8 @@ from django.urls import path
 
 from .views import (
     CreateHouseholdView,
+    HouseholdEditView,
+    LeaveHouseholdView,
     MemberAddView,
     MemberEditView,
     MemberListView,
@@ -11,6 +13,8 @@ from .views import (
 
 urlpatterns = [
     path("household/create/", CreateHouseholdView.as_view(), name="household_create"),
+    path("household/edit/", HouseholdEditView.as_view(), name="household_edit"),
+    path("household/leave/", LeaveHouseholdView.as_view(), name="household_leave"),
     path("members/", MemberListView.as_view(), name="member_list"),
     path("members/add/", MemberAddView.as_view(), name="member_add"),
     path("members/<int:pk>/edit/", MemberEditView.as_view(), name="member_edit"),

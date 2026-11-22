@@ -3,12 +3,11 @@
 {% block content %}
 <div class="auth">
     {% include "partials/hero.html" %}
-    <section class="card auth-card">
+    <section class="card auth-card animate-in">
         <h2>Welcome back</h2>
         <p class="muted">Log in to see this week's chores.</p>
         <form method="post">
             {% csrf_token %}
-            {{ form.non_field_errors }}
             {{ form.as_p }}
             <input type="hidden" name="next" value="{{ next }}">
             <button type="submit">Log in</button>

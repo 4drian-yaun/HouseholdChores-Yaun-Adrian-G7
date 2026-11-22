@@ -160,3 +160,40 @@ class MemberTests(TestCase):
         self.assertEqual(response.status_code, 404)
         response = self.client.post(reverse("member_remove", args=[self.boss_member.pk]))
         self.assertEqual(response.status_code, 404)
+
+    def test_admin_can_rename_household_and_member_cannot(self):
+        add_member(self.household, "Ana", self.ana)
+        self.client.force_login(self.ana)
+        blocked = self.client.post(reverse("household_edit"), {"name": "Hacked"}, follow=True)
+        self.assertContains(blocked, "Only a Household Admin")
+        self.household.refresh_from_db()
+        self.assertEqual(self.household.name, "Casa")
+
+        self.client.force_login(self.boss)
+        ok = self.client.post(reverse("household_edit"), {"name": "Casa Nueva"}, follow=True)
+        self.assertContains(ok, "Casa Nueva")
+        self.household.refresh_from_db()
+        self.assertEqual(self.household.name, "Casa Nueva")
+
+    def test_member_can_leave_household_and_sole_admin_cannot(self):
+        ana_member, _ = add_member(self.household, "Ana", self.ana)
+        self.client.force_login(self.boss)
+        blocked = self.client.post(reverse("household_leave"), follow=True)
+        self.assertContains(blocked, "only active Household Admin")
+        self.boss_member.refresh_from_db()
+        self.assertTrue(self.boss_member.is_active)
+
+        self.client.force_login(self.ana)
+        left = self.client.post(reverse("household_leave"), follow=True)
+        self.assertContains(left, "You have left")
+        ana_member.refresh_from_db()
+        self.assertFalse(ana_member.is_active)
+        self.assertIsNone(ana_member.rotation_order)
+
+    def test_admin_can_leave_when_another_admin_exists(self):
+        add_member(self.household, "Ana", self.ana, role=HouseholdMember.Role.ADMIN)
+        self.client.force_login(self.boss)
+        response = self.client.post(reverse("household_leave"), follow=True)
+        self.assertContains(response, "You have left")
+        self.boss_member.refresh_from_db()
+        self.assertFalse(self.boss_member.is_active)

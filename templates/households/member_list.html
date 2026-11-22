@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Members | HouseholdChores{% endblock %}
 {% block content %}
-<div class="page-head">
+<div class="page-head animate-in">
     <div>
         <h1>Members</h1>
         <p class="muted">Chores rotate in the order shown below, then start over after the last person.</p>
     </div>
-    <a class="btn-link btn-inline" href="{% url 'member_add' %}">Add member</a>
+    <div class="head-actions">
+        <a class="btn-sm ghost" href="{% url 'household_edit' %}">Rename household</a>
+        <a class="btn-link btn-inline" href="{% url 'member_add' %}">+ Add member</a>
+    </div>
 </div>
-<section class="card">
+<section class="card animate-in">
     <div class="table-wrap">
         <table>
             <thead>
@@ -17,16 +20,24 @@
             <tbody>
                 {% for m in active_members %}
                 <tr>
-                    <td>{{ m.rotation_order }}</td>
-                    <td><strong>{{ m.display_name }}</strong>{% if m.pk == request.membership.pk %} <span class="tag">you</span>{% endif %}</td>
+                    <td><span class="order-num">{{ m.rotation_order }}</span></td>
+                    <td>
+                        <div class="member-cell">
+                            <span class="avatar avatar-c{{ m.id|divisibleby:4|yesno:'3,0' }}{% if m.id|divisibleby:3 %} avatar-c2{% elif m.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ m.display_name|slice:":1"|upper }}</span>
+                            <div>
+                                <strong>{{ m.display_name }}</strong>
+                                {% if m.pk == request.membership.pk %} <span class="tag tag-me">you</span>{% endif %}
+                            </div>
+                        </div>
+                    </td>
                     <td>{% if m.user %}{{ m.user.username }}{% else %}<span class="sub">No account (cannot log in)</span>{% endif %}</td>
-                    <td>{{ m.get_role_display }}</td>
+                    <td><span class="role-chip {{ m.role|lower }}">{{ m.get_role_display }}</span></td>
                     <td class="cell-action">
                         {% if not forloop.first %}
-                        <form method="post" action="{% url 'member_move' m.pk 'up' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost" aria-label="Move up">&uarr;</button></form>
+                        <form method="post" action="{% url 'member_move' m.pk 'up' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move up">&uarr;</button></form>
                         {% endif %}
                         {% if not forloop.last %}
-                        <form method="post" action="{% url 'member_move' m.pk 'down' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost" aria-label="Move down">&darr;</button></form>
+                        <form method="post" action="{% url 'member_move' m.pk 'down' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move down">&darr;</button></form>
                         {% endif %}
                     </td>
                     <td class="cell-action">
@@ -40,7 +51,7 @@
     </div>
 </section>
 {% if former_members %}
-<section class="card">
+<section class="card animate-in">
     <h2>Former members</h2>
     <p class="muted">Removed members stay in history but are skipped in every future rotation.</p>
     <ul class="info-list">

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Remove member | HouseholdChores{% endblock %}
 {% block content %}
-<div class="narrow">
-    <section class="card">
+<div class="narrow animate-in">
+    <section class="card danger-card">
         <h2>Remove {{ member.display_name }}?</h2>
         <p class="muted">They will be skipped in all future rotations. Their pending chores for this week go to other members, and their past history is kept.</p>
         <form method="post">
