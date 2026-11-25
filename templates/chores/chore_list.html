@@ -28,7 +28,7 @@
             <tbody>
                 {% for c in active_chores %}
                 <tr>
-                    <td><strong>{{ c.name }}</strong>{% if c.description %}<small class="sub">{{ c.description }}</small>{% endif %}</td>
+                    <td><a href="{% url 'chore_detail' c.pk %}"><strong>{{ c.name }}</strong></a>{% if c.description %}<small class="sub">{{ c.description }}</small>{% endif %}</td>
                     <td>
                         {% if c.current %}
                         <div class="member-cell">
