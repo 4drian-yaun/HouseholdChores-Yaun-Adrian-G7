@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     AnalyticsView,
     ChoreCreateView,
+    ChoreDetailView,
     ChoreEditView,
     ChoreListView,
     ChoreRetireView,
@@ -13,6 +14,7 @@ from .views import (
 urlpatterns = [
     path("chores/", ChoreListView.as_view(), name="chore_list"),
     path("chores/add/", ChoreCreateView.as_view(), name="chore_add"),
+    path("chores/<int:pk>/", ChoreDetailView.as_view(), name="chore_detail"),
     path("chores/<int:pk>/edit/", ChoreEditView.as_view(), name="chore_edit"),
     path("chores/<int:pk>/retire/", ChoreRetireView.as_view(), name="chore_retire"),
     path("assignments/<int:pk>/complete/", CompleteAssignmentView.as_view(), name="assignment_complete"),

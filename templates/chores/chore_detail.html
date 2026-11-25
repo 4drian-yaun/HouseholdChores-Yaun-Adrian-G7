@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}{{ chore.name }} | HouseholdChores{% endblock %}
+{% block content %}
+<div class="animate-in">
+    <a class="back-link" href="{% if is_admin %}{% url 'chore_list' %}{% else %}{% url 'dashboard' %}{% endif %}">&larr; Back to {% if is_admin %}chores{% else %}dashboard{% endif %}</a>
+</div>
+
+<div class="page-head animate-in">
+    <div>
+        <h1>
+            {{ chore.name }}
+            {% if chore.is_active %}<span class="tag">Active</span>{% else %}<span class="tag">Retired</span>{% endif %}
+        </h1>
+        <p class="muted">
+            {% if chore.description %}{{ chore.description }} &middot; {% endif %}
+            Added {{ chore.created_at|date:"M d, Y" }}
+        </p>
+    </div>
+    {% if is_admin and chore.is_active %}
+    <div class="head-actions">
+        <a class="btn-sm ghost" href="{% url 'chore_edit' chore.pk %}">Edit chore</a>
+        <a class="btn-sm danger" href="{% url 'chore_retire' chore.pk %}">Retire</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="stats stats-4 stagger">
+    <div class="stat kpi-card animate-in">
+        <span class="stat-label">Closed weeks</span>
+        <strong class="kpi-value">{{ closed_total }}</strong>
+        <small class="kpi-sub">Completed + missed</small>
+    </div>
+    <div class="stat kpi-card animate-in">
+        <span class="stat-label">Completed</span>
+        <strong class="kpi-value">{{ done }}</strong>
+        <small class="kpi-sub">Finished on time</small>
+    </div>
+    <div class="stat kpi-card stat-warn animate-in">
+        <span class="stat-label">Missed</span>
+        <strong class="kpi-value">{{ missed }}</strong>
+        <small class="kpi-sub">{% if missed == 0 %}Perfect record{% else %}Unfinished{% endif %}</small>
+    </div>
+    <div class="stat kpi-card animate-in">
+        <span class="stat-label">Completion rate</span>
+        <strong class="kpi-value">{{ rate }}%</strong>
+        <small class="kpi-sub">Excludes current pending</small>
+    </div>
+</div>
+
+{% if current or next_member %}
+<div class="insight-strip animate-in">
+    <div class="insight-item">
+        <span class="insight-label">This week's assignee</span>
+        <strong>{% if current %}{{ current.member.display_name }} ({{ current.get_status_display }}){% else %}None{% endif %}</strong>
+    </div>
+    <div class="insight-divider" aria-hidden="true"></div>
+    <div class="insight-item">
+        <span class="insight-label">Next Monday</span>
+        <strong>{% if next_member %}&rarr; {{ next_member.display_name }}{% else %}Retired (no future rotation){% endif %}</strong>
+    </div>
+    {% if current and current.can_complete %}
+    <div class="insight-divider" aria-hidden="true"></div>
+    <form method="post" action="{% url 'assignment_complete' current.pk %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="btn-sm btn-done">Mark done &#10003;</button>
+    </form>
+    {% endif %}
+</div>
+{% endif %}
+
+<section class="card animate-in">
+    <div class="card-head">
+        <div>
+            <h2>Assignment history ({{ assignments|length }})</h2>
+            <p class="card-sub">Every weekly rotation record for "{{ chore.name }}".</p>
+        </div>
+    </div>
+    {% if assignments %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Week</th><th>Assigned to</th><th>Status</th><th>Completed</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for a in assignments %}
+                <tr class="{% if a.is_mine %}is-mine{% endif %}">
+                    <td>
+                        <strong>{{ a.week_start_date|date:"M d" }} &ndash; {{ a.due_date|date:"M d, Y" }}</strong>
+                    </td>
+                    <td>
+                        <div class="member-cell">
+                            <span class="avatar avatar-sm avatar-c{{ a.member.id|divisibleby:4|yesno:'3,0' }}{% if a.member.id|divisibleby:3 %} avatar-c2{% elif a.member.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ a.member.display_name|slice:":1"|upper }}</span>
+                            <span>
+                                {{ a.member.display_name }}
+                                {% if a.is_mine %}<span class="tag tag-me">you</span>{% endif %}
+                                {% if not a.member.is_active %}<span class="tag">removed</span>{% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td><span class="status {{ a.status|lower }}">{{ a.get_status_display }}</span></td>
+                    <td class="muted-cell">{% if a.completed_at %}{{ a.completed_at|date:"M d, g:i A" }}{% else %}&ndash;{% endif %}</td>
+                    <td class="cell-action">
+                        {% if a.can_complete %}
+                        <form method="post" action="{% url 'assignment_complete' a.pk %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-sm btn-done">Mark done &#10003;</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">No assignments recorded for this chore yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -2,6 +2,8 @@
 
 **Who's doing what this week?** A web-based weekly chore rotation tracker built with Django and PostgreSQL/Supabase for roommates, families, dormitories, and shared living spaces.
 
+**Live App:** https://householdchores-yaun-adrian-g7.onrender.com
+
 ## Tech Stack
 
 - **Backend:** Python, Django 6.1
@@ -70,6 +72,9 @@ Chore weeks run from **Monday to Sunday**. Opening any household page automatica
 ```bash
 python manage.py rotate_weekly
 ```
+
+### GitHub Actions (Cloud Cron)
+A workflow is included at `.github/workflows/rotate_weekly.yml` to run `rotate_weekly` every Monday at `00:00 Asia/Manila` (`Sunday 16:00 UTC`) using repository secrets (`SECRET_KEY`, `DB_*`).
 
 ### Linux / Crontab
 See `scripts/crontab.example` or add via `crontab -e`:

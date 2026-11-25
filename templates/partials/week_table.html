@@ -14,7 +14,7 @@
             {% for a in overview.assignments %}
             <tr class="chore-row{% if a.is_mine %} is-mine{% endif %}" data-mine="{% if a.is_mine %}true{% else %}false{% endif %}" data-status="{{ a.status|lower }}">
                 <td>
-                    <strong>{{ a.chore.name }}</strong>
+                    <a href="{% url 'chore_detail' a.chore.pk %}"><strong>{{ a.chore.name }}</strong></a>
                     {% if not a.chore.is_active %} <span class="tag">retired</span>{% endif %}
                     {% if a.chore.description %}<small class="sub">{{ a.chore.description }}</small>{% endif %}
                 </td>
