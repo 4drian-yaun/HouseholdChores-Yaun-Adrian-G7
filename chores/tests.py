@@ -441,3 +441,18 @@ class ChoreManagementTests(Base):
         self.client.force_login(self.boss)
         response = self.client.get(reverse("chore_edit", args=[foreign.pk]))
         self.assertEqual(response.status_code, 404)
+
+    def test_chore_detail_accessible_to_own_household_and_blocks_others(self):
+        with at(MONDAY):
+            chore = self.chore("Mop floors")
+        self.client.force_login(self.ana)
+        response = self.client.get(reverse("chore_detail", args=[chore.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Mop floors")
+        self.assertContains(response, "Assignment history")
+
+        stranger = make_user("outsider")
+        create_household(stranger, "Outside House")
+        self.client.force_login(stranger)
+        blocked = self.client.get(reverse("chore_detail", args=[chore.pk]))
+        self.assertEqual(blocked.status_code, 404)

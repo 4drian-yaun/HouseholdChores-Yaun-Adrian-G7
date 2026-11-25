@@ -7,6 +7,7 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from households.mixins import HouseholdContextMixin
+from households.models import HouseholdMember
 
 from .forms import ChoreForm
 from .models import Assignment, Chore
@@ -15,10 +16,12 @@ from .services import (
     active_members,
     analytics,
     complete_assignment,
+    completion_block_reason,
     create_chore,
     current_week_start,
     next_in_rotation,
     past_weeks,
+    percent,
     retire_chore,
     week_overview,
 )
@@ -48,6 +51,49 @@ class ChoreListView(HouseholdContextMixin, TemplateView):
                 chore.next_member = None
         context["active_chores"] = [c for c in chores if c.is_active]
         context["retired_chores"] = [c for c in chores if not c.is_active]
+        return context
+
+
+class ChoreDetailView(HouseholdContextMixin, TemplateView):
+    template_name = "chores/chore_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        household = self.request.household
+        membership = self.request.membership
+        chore = get_object_or_404(Chore, pk=self.kwargs["pk"], household=household)
+        week = current_week_start()
+        assignments = list(
+            chore.assignments.select_related("member").order_by("-week_start_date")
+        )
+        current = None
+        for assignment in assignments:
+            assignment.can_complete = completion_block_reason(membership, assignment) is None
+            assignment.is_mine = assignment.member_id == membership.id
+            if assignment.week_start_date == week:
+                current = assignment
+
+        done = sum(1 for a in assignments if a.status == Assignment.Status.COMPLETED)
+        missed = sum(1 for a in assignments if a.status == Assignment.Status.MISSED)
+        closed_total = done + missed
+        members = active_members(household)
+        next_member = (
+            next_in_rotation(current.member, members, chore)
+            if chore.is_active and current and members
+            else None
+        )
+
+        context.update(
+            chore=chore,
+            assignments=assignments,
+            current=current,
+            next_member=next_member,
+            done=done,
+            missed=missed,
+            closed_total=closed_total,
+            rate=percent(done, closed_total),
+            is_admin=membership.role == HouseholdMember.Role.ADMIN,
+        )
         return context
 
 
