@@ -15,10 +15,10 @@
 
 {% if weeks %}
 <section class="card filter-card animate-in">
-    <form method="get" class="filter-form" data-auto-submit>
+    <form method="get" class="filter-form filter-stacked" data-auto-submit>
         <div class="filter-group">
             <label for="week">Week</label>
-            <select name="week" id="week">
+            <select name="week" id="week" data-searchable-select data-search-placeholder="Type or scroll weeks...">
                 {% for w in weeks %}
                 <option value="{{ w|date:'Y-m-d' }}" {% if w == selected %}selected{% endif %}>{{ w|date:"M d, Y" }}</option>
                 {% endfor %}
@@ -26,21 +26,23 @@
         </div>
         <div class="filter-group">
             <label for="member">Member</label>
-            <select name="member" id="member">
+            <select name="member" id="member" data-searchable-select data-search-placeholder="Type or scroll members...">
                 <option value="">All members</option>
                 {% for m in members %}
                 <option value="{{ m.pk }}" {% if m.pk == selected_member %}selected{% endif %}>{{ m.display_name }}{% if not m.is_active %} (removed){% endif %}</option>
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="btn-sm">Show</button>
-        <div class="week-pager">
-            {% if prev_week %}
-            <a class="btn-sm ghost" href="?week={{ prev_week|date:'Y-m-d' }}{% if selected_member %}&amp;member={{ selected_member }}{% endif %}">&larr; Older</a>
-            {% endif %}
-            {% if next_week %}
-            <a class="btn-sm ghost" href="?week={{ next_week|date:'Y-m-d' }}{% if selected_member %}&amp;member={{ selected_member }}{% endif %}">Newer &rarr;</a>
-            {% endif %}
+        <div class="filter-actions">
+            <button type="submit" class="btn-sm">Show</button>
+            <div class="week-pager">
+                {% if prev_week %}
+                <a class="btn-sm ghost" href="?week={{ prev_week|date:'Y-m-d' }}{% if selected_member %}&amp;member={{ selected_member }}{% endif %}">&larr; Older</a>
+                {% endif %}
+                {% if next_week %}
+                <a class="btn-sm ghost" href="?week={{ next_week|date:'Y-m-d' }}{% if selected_member %}&amp;member={{ selected_member }}{% endif %}">Newer &rarr;</a>
+                {% endif %}
+            </div>
         </div>
     </form>
 </section>
@@ -48,19 +50,31 @@
 <div class="stats stats-4 stagger">
     <div class="stat kpi-card animate-in">
         <span class="stat-label">Assignments</span>
-        <strong class="kpi-value">{{ overview.total }}</strong>
+        <div class="kpi-row">
+            <strong class="kpi-value">{{ overview.total }}</strong>
+            <span class="pct-pill ok">Archived</span>
+        </div>
     </div>
     <div class="stat kpi-card animate-in">
         <span class="stat-label">Completed</span>
-        <strong class="kpi-value">{{ overview.done }}</strong>
+        <div class="kpi-row">
+            <strong class="kpi-value">{{ overview.done }}</strong>
+            <span class="pct-pill ok">Done</span>
+        </div>
     </div>
     <div class="stat kpi-card stat-warn animate-in">
         <span class="stat-label">Missed</span>
-        <strong class="kpi-value">{{ overview.missed }}</strong>
+        <div class="kpi-row">
+            <strong class="kpi-value">{{ overview.missed }}</strong>
+            <span class="pct-pill {% if overview.missed == 0 %}ok{% else %}warn{% endif %}">{% if overview.missed == 0 %}None{% else %}Missed{% endif %}</span>
+        </div>
     </div>
     <div class="stat kpi-card animate-in">
         <span class="stat-label">Completion rate</span>
-        <strong class="kpi-value">{{ overview.percent }}%</strong>
+        <div class="kpi-row">
+            <strong class="kpi-value">{{ overview.percent }}%</strong>
+            <span class="pct-pill {% if overview.percent >= 80 %}ok{% elif overview.percent >= 50 %}sun{% else %}warn{% endif %}">Rate</span>
+        </div>
     </div>
 </div>
 

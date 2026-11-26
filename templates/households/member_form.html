@@ -28,7 +28,10 @@
                 <div class="form-field">
                     <label for="{{ form.username.id_for_label }}">Linked account username <span class="opt">(optional)</span></label>
                     {{ form.username.errors }}
-                    {{ form.username }}
+                    <div class="input-adorn">
+                        <span class="adorn-prefix" aria-hidden="true">@</span>
+                        {{ form.username }}
+                    </div>
                     {% if form.username.help_text %}<span class="helptext">{{ form.username.help_text }}</span>{% endif %}
                 </div>
                 <div class="form-field">

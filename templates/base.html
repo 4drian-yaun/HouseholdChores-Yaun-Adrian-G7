@@ -4,28 +4,28 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#1f6f5c" id="themeColorMeta">
+        <meta name="theme-color" content="#fcfcfd" id="themeColorMeta">
         <title>{% block title %}HouseholdChores{% endblock %}</title>
-        <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+        <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}?v=11">
         <script>
             (function () {
                 var saved = localStorage.getItem("hc-theme");
                 var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
                 document.documentElement.setAttribute("data-theme", theme);
                 var meta = document.getElementById("themeColorMeta");
-                if (meta) meta.setAttribute("content", theme === "dark" ? "#132924" : "#1f6f5c");
+                if (meta) meta.setAttribute("content", theme === "dark" ? "#1c1e21" : "#fcfcfd");
             })();
         </script>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
     </head>
     <body>
         <header class="topbar" id="topbar">
             <div class="topbar-inner">
                 <a class="brand" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">
-                    <img src="{% static 'img/logo.svg' %}" alt="" width="38" height="38">
+                    <img src="{% static 'img/logo.svg' %}?v=11" alt="" width="34" height="34">
                     <span>HouseholdChores</span>
                 </a>
                 <div class="topbar-controls">
@@ -44,7 +44,7 @@
                         <a href="{% url 'dashboard' %}" class="{% if current == 'dashboard' %}active{% endif %}">Dashboard</a>
                         {% if is_household_admin %}
                             <a href="{% url 'member_list' %}" class="{% if current == 'member_list' or current == 'member_add' or current == 'member_edit' or current == 'member_remove' %}active{% endif %}">Members</a>
-                            <a href="{% url 'chore_list' %}" class="{% if current == 'chore_list' or current == 'chore_add' or current == 'chore_edit' or current == 'chore_retire' %}active{% endif %}">Chores</a>
+                            <a href="{% url 'chore_list' %}" class="{% if current == 'chore_list' or current == 'chore_add' or current == 'chore_edit' or current == 'chore_retire' or current == 'chore_detail' %}active{% endif %}">Chores</a>
                         {% endif %}
                         {% if membership %}
                             <a href="{% url 'history' %}" class="{% if current == 'history' %}active{% endif %}">History</a>
@@ -67,14 +67,43 @@
         {% if messages %}
             <ul class="messages" role="status" aria-live="polite">
                 {% for message in messages %}
-                    <li class="{{ message.tags }}">
-                        <span class="msg-text">{{ message }}</span>
+                    <li class="feedback-toast {{ message.tags }}">
+                        <span class="toast-icon" aria-hidden="true">
+                            {% if 'success' in message.tags %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            {% elif 'error' in message.tags %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            {% else %}
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                            {% endif %}
+                        </span>
+                        <div class="toast-body">
+                            <strong class="toast-title">{% if 'success' in message.tags %}Done!{% elif 'error' in message.tags %}Action required{% else %}Update{% endif %}</strong>
+                            <span class="msg-text">{{ message }}</span>
+                        </div>
                         <button type="button" class="msg-close" aria-label="Dismiss">&times;</button>
                     </li>
                 {% endfor %}
             </ul>
         {% endif %}
-        <main class="page">{% block content %}{% endblock %}</main>
-        <script src="{% static 'js/app.js' %}?v=8" defer></script>
+        <div class="page-skeleton" id="pageSkeleton" hidden aria-hidden="true">
+            <div class="skel-head">
+                <div class="skel skel-title"></div>
+                <div class="skel skel-sub"></div>
+            </div>
+            <div class="skel-stats">
+                <div class="skel skel-kpi"></div>
+                <div class="skel skel-kpi"></div>
+                <div class="skel skel-kpi"></div>
+            </div>
+            <div class="skel-card">
+                <div class="skel skel-line lg"></div>
+                <div class="skel skel-line"></div>
+                <div class="skel skel-line"></div>
+                <div class="skel skel-line sm"></div>
+            </div>
+        </div>
+        <main class="page" id="pageContent">{% block content %}{% endblock %}</main>
+        <script src="{% static 'js/app.js' %}?v=10" defer></script>
     </body>
 </html>
