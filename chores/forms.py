@@ -8,6 +8,12 @@ class ChoreForm(forms.ModelForm):
         model = Chore
         fields = ("name", "description")
         labels = {"name": "Chore name", "description": "Details (optional)"}
+        widgets = {
+            "name": forms.TextInput(attrs={"placeholder": "e.g. Take out trash"}),
+            "description": forms.TextInput(
+                attrs={"placeholder": "e.g. Empty kitchen & bathroom bins before Sunday evening"}
+            ),
+        }
 
     def __init__(self, *args, household, **kwargs):
         super().__init__(*args, **kwargs)

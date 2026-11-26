@@ -10,6 +10,11 @@ class HouseholdForm(forms.ModelForm):
         model = Household
         fields = ("name",)
         labels = {"name": "Household name"}
+        widgets = {
+            "name": forms.TextInput(
+                attrs={"placeholder": "e.g. Apartment 4B or Yaun Family", "autocomplete": "organization"}
+            ),
+        }
 
     def clean_name(self):
         name = self.cleaned_data["name"].strip()
@@ -19,12 +24,17 @@ class HouseholdForm(forms.ModelForm):
 
 
 class MemberForm(forms.Form):
-    display_name = forms.CharField(max_length=100, label="Display name")
+    display_name = forms.CharField(
+        max_length=100,
+        label="Display name",
+        widget=forms.TextInput(attrs={"placeholder": "e.g. Sam Cruz", "autocomplete": "name"}),
+    )
     username = forms.CharField(
         max_length=150,
         required=False,
         label="Linked account username",
         help_text="Optional. Enter the username of a registered account so this person can log in. Leave blank for someone without an account.",
+        widget=forms.TextInput(attrs={"placeholder": "e.g. sam_cruz", "autocomplete": "off"}),
     )
     role = forms.ChoiceField(
         choices=HouseholdMember.Role.choices,
@@ -50,7 +60,7 @@ class MemberForm(forms.Form):
         return name
 
     def clean_username(self):
-        value = (self.cleaned_data.get("username") or "").strip()
+        value = (self.cleaned_data.get("username") or "").strip().lstrip("@")
         if not value:
             return None
         user = CustomUser.objects.filter(username__iexact=value).first()

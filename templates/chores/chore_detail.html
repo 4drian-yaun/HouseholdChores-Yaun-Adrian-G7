@@ -18,8 +18,14 @@
     </div>
     {% if is_admin and chore.is_active %}
     <div class="head-actions">
-        <a class="btn-sm ghost" href="{% url 'chore_edit' chore.pk %}">Edit chore</a>
-        <a class="btn-sm danger" href="{% url 'chore_retire' chore.pk %}">Retire</a>
+        <a class="btn-sm ghost btn-with-icon" href="{% url 'chore_edit' chore.pk %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Edit chore
+        </a>
+        <a class="btn-sm danger-ghost btn-with-icon" href="{% url 'chore_retire' chore.pk %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Retire
+        </a>
     </div>
     {% endif %}
 </div>
@@ -27,22 +33,34 @@
 <div class="stats stats-4 stagger">
     <div class="stat kpi-card animate-in">
         <span class="stat-label">Closed weeks</span>
-        <strong class="kpi-value">{{ closed_total }}</strong>
+        <div class="kpi-row">
+            <strong class="kpi-value">{{ closed_total }}</strong>
+            <span class="pct-pill ok">Archived</span>
+        </div>
         <small class="kpi-sub">Completed + missed</small>
     </div>
     <div class="stat kpi-card animate-in">
         <span class="stat-label">Completed</span>
-        <strong class="kpi-value">{{ done }}</strong>
+        <div class="kpi-row">
+            <strong class="kpi-value">{{ done }}</strong>
+            <span class="pct-pill ok">On time</span>
+        </div>
         <small class="kpi-sub">Finished on time</small>
     </div>
     <div class="stat kpi-card stat-warn animate-in">
         <span class="stat-label">Missed</span>
-        <strong class="kpi-value">{{ missed }}</strong>
+        <div class="kpi-row">
+            <strong class="kpi-value">{{ missed }}</strong>
+            <span class="pct-pill {% if missed == 0 %}ok{% else %}warn{% endif %}">{% if missed == 0 %}Perfect{% else %}Missed{% endif %}</span>
+        </div>
         <small class="kpi-sub">{% if missed == 0 %}Perfect record{% else %}Unfinished{% endif %}</small>
     </div>
     <div class="stat kpi-card animate-in">
         <span class="stat-label">Completion rate</span>
-        <strong class="kpi-value">{{ rate }}%</strong>
+        <div class="kpi-row">
+            <strong class="kpi-value">{{ rate }}%</strong>
+            <span class="pct-pill {% if rate >= 80 %}ok{% elif rate >= 50 %}sun{% else %}warn{% endif %}">Rate</span>
+        </div>
         <small class="kpi-sub">Excludes current pending</small>
     </div>
 </div>

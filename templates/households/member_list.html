@@ -7,8 +7,14 @@
         <p class="muted">Chores rotate in the order shown below, then wrap back to the first person.</p>
     </div>
     <div class="head-actions">
-        <a class="btn-sm ghost" href="{% url 'household_edit' %}">Rename household</a>
-        <a class="btn-link btn-inline" href="{% url 'member_add' %}">+ Add member</a>
+        <a class="btn-sm ghost btn-with-icon" href="{% url 'household_edit' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Rename
+        </a>
+        <a class="btn-link btn-inline btn-with-icon" href="{% url 'member_add' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add member
+        </a>
     </div>
 </div>
 
@@ -35,6 +41,12 @@
             <h2>Active members ({{ active_members|length }})</h2>
             <p class="card-sub">Use the arrows to adjust weekly rotation order.</p>
         </div>
+        {% if active_members|length > 2 %}
+        <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" placeholder="Search members..." aria-label="Search members" data-table-search=".member-row">
+        </div>
+        {% endif %}
     </div>
     <div class="table-wrap">
         <table>
@@ -43,7 +55,7 @@
             </thead>
             <tbody>
                 {% for m in active_members %}
-                <tr class="{% if m.pk == request.membership.pk %}is-mine{% endif %}">
+                <tr class="member-row{% if m.pk == request.membership.pk %} is-mine{% endif %}">
                     <td><span class="order-num">{{ m.rotation_order }}</span></td>
                     <td>
                         <div class="member-cell">
@@ -65,13 +77,22 @@
                         {% endif %}
                     </td>
                     <td class="cell-action">
-                        <a class="btn-sm ghost" href="{% url 'member_edit' m.pk %}">Edit</a>
-                        {% if m.pk != request.membership.pk %}<a class="btn-sm danger" href="{% url 'member_remove' m.pk %}">Remove</a>{% endif %}
+                        <a class="btn-sm ghost btn-with-icon" href="{% url 'member_edit' m.pk %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                            Edit
+                        </a>
+                        {% if m.pk != request.membership.pk %}
+                        <a class="btn-sm danger-ghost btn-with-icon" href="{% url 'member_remove' m.pk %}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                            Remove
+                        </a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    <p class="empty filter-empty" hidden>No members match your search.</p>
 </section>
 {% endblock %}
