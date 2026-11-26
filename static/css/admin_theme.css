@@ -289,6 +289,7 @@ h1, h2, h3 {
   border-radius: 999px;
   width: 34px;
   height: 34px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -301,11 +302,16 @@ h1, h2, h3 {
   background: var(--hairline-color);
 }
 
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
 .theme-toggle svg.theme-icon-when-auto,
 .theme-toggle svg.theme-icon-when-dark,
 .theme-toggle svg.theme-icon-when-light {
-  color: var(--body-fg);
   fill: var(--body-fg);
+  color: transparent;
 }
 
 /* Breadcrumbs */
