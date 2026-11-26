@@ -1,0 +1,672 @@
+/* ============================================================
+   HouseholdChores — Clean Mainstream Theme for Django Admin
+   Matches the neutral + single blue accent UI (Light & Dark)
+   ============================================================ */
+
+html[data-theme="light"],
+:root {
+  --hc-card: #fcfcfd;
+  --hc-tint: #ebf3ff;
+  --hc-ok: #16a34a;
+  --hc-ok-tint: #eafaf1;
+  --hc-warn: #d97706;
+  --hc-warn-tint: #fef3c7;
+  --hc-danger-tint: #fef2f2;
+
+  --primary: #1877f2;
+  --secondary: #1565d8;
+  --accent: #1877f2;
+  --primary-fg: #fcfcfd;
+
+  --body-fg: #111827;
+  --body-bg: #f2f4f7;
+  --body-quiet-color: #65676b;
+  --body-medium-color: #374151;
+  --body-loud-color: #111827;
+
+  --header-color: #111827;
+  --header-branding-color: #111827;
+  --header-bg: #fcfcfd;
+  --header-link-color: #65676b;
+
+  --breadcrumbs-fg: #65676b;
+  --breadcrumbs-link-fg: #1877f2;
+  --breadcrumbs-bg: #fcfcfd;
+
+  --link-fg: #1877f2;
+  --link-hover-color: #1565d8;
+  --link-selected-fg: #1877f2;
+
+  --hairline-color: #e4e6eb;
+  --border-color: #d8dce3;
+
+  --error-fg: #dc2626;
+
+  --message-debug-bg: #f0f2f5;
+  --message-info-bg: #ebf3ff;
+  --message-success-bg: #eafaf1;
+  --message-warning-bg: #fef3c7;
+  --message-error-bg: #fef2f2;
+
+  --darkened-bg: #f0f2f5;
+  --selected-bg: #ebf3ff;
+  --selected-row: #ebf3ff;
+
+  --button-fg: #fcfcfd;
+  --button-bg: #1877f2;
+  --button-hover-bg: #1565d8;
+  --default-button-bg: #1877f2;
+  --default-button-hover-bg: #1565d8;
+  --close-button-bg: #e4e6eb;
+  --close-button-hover-bg: #d1d5db;
+  --delete-button-bg: #dc2626;
+  --delete-button-hover-bg: #b91c1c;
+
+  --object-tools-fg: #fcfcfd;
+  --object-tools-bg: #1877f2;
+  --object-tools-hover-bg: #1565d8;
+
+  --font-family-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hc-card: #1c1e21;
+    --hc-tint: #1e2d42;
+    --hc-ok: #4ade80;
+    --hc-ok-tint: #142e20;
+    --hc-warn: #fbbf24;
+    --hc-warn-tint: #332914;
+    --hc-danger-tint: #351b1b;
+
+    --primary: #4e9af8;
+    --secondary: #3b82f6;
+    --accent: #4e9af8;
+    --primary-fg: #fcfcfd;
+
+    --body-fg: #e4e6eb;
+    --body-bg: #121316;
+    --body-quiet-color: #9ca3af;
+    --body-medium-color: #d1d5db;
+    --body-loud-color: #f3f4f6;
+
+    --header-color: #e4e6eb;
+    --header-branding-color: #e4e6eb;
+    --header-bg: #1c1e21;
+    --header-link-color: #9ca3af;
+
+    --breadcrumbs-fg: #9ca3af;
+    --breadcrumbs-link-fg: #60a5fa;
+    --breadcrumbs-bg: #1c1e21;
+
+    --link-fg: #60a5fa;
+    --link-hover-color: #93c5fd;
+    --link-selected-fg: #60a5fa;
+
+    --hairline-color: #2f3136;
+    --border-color: #363940;
+
+    --error-fg: #f87171;
+
+    --message-debug-bg: #24262b;
+    --message-info-bg: #1e2d42;
+    --message-success-bg: #142e20;
+    --message-warning-bg: #332914;
+    --message-error-bg: #351b1b;
+
+    --darkened-bg: #24262b;
+    --selected-bg: #1e2d42;
+    --selected-row: #1e2d42;
+
+    --button-fg: #fcfcfd;
+    --button-bg: #4e9af8;
+    --button-hover-bg: #3b82f6;
+    --default-button-bg: #4e9af8;
+    --default-button-hover-bg: #3b82f6;
+    --close-button-bg: #2f3136;
+    --close-button-hover-bg: #3e4148;
+    --delete-button-bg: #dc2626;
+    --delete-button-hover-bg: #b91c1c;
+
+    --object-tools-fg: #fcfcfd;
+    --object-tools-bg: #4e9af8;
+    --object-tools-hover-bg: #3b82f6;
+
+    color-scheme: dark;
+  }
+}
+
+html[data-theme="dark"] {
+  --hc-card: #1c1e21;
+  --hc-tint: #1e2d42;
+  --hc-ok: #4ade80;
+  --hc-ok-tint: #142e20;
+  --hc-warn: #fbbf24;
+  --hc-warn-tint: #332914;
+  --hc-danger-tint: #351b1b;
+
+  --primary: #4e9af8;
+  --secondary: #3b82f6;
+  --accent: #4e9af8;
+  --primary-fg: #fcfcfd;
+
+  --body-fg: #e4e6eb;
+  --body-bg: #121316;
+  --body-quiet-color: #9ca3af;
+  --body-medium-color: #d1d5db;
+  --body-loud-color: #f3f4f6;
+
+  --header-color: #e4e6eb;
+  --header-branding-color: #e4e6eb;
+  --header-bg: #1c1e21;
+  --header-link-color: #9ca3af;
+
+  --breadcrumbs-fg: #9ca3af;
+  --breadcrumbs-link-fg: #60a5fa;
+  --breadcrumbs-bg: #1c1e21;
+
+  --link-fg: #60a5fa;
+  --link-hover-color: #93c5fd;
+  --link-selected-fg: #60a5fa;
+
+  --hairline-color: #2f3136;
+  --border-color: #363940;
+
+  --error-fg: #f87171;
+
+  --message-debug-bg: #24262b;
+  --message-info-bg: #1e2d42;
+  --message-success-bg: #142e20;
+  --message-warning-bg: #332914;
+  --message-error-bg: #351b1b;
+
+  --darkened-bg: #24262b;
+  --selected-bg: #1e2d42;
+  --selected-row: #1e2d42;
+
+  --button-fg: #fcfcfd;
+  --button-bg: #4e9af8;
+  --button-hover-bg: #3b82f6;
+  --default-button-bg: #4e9af8;
+  --default-button-hover-bg: #3b82f6;
+  --close-button-bg: #2f3136;
+  --close-button-hover-bg: #3e4148;
+  --delete-button-bg: #dc2626;
+  --delete-button-hover-bg: #b91c1c;
+
+  --object-tools-fg: #fcfcfd;
+  --object-tools-bg: #4e9af8;
+  --object-tools-hover-bg: #3b82f6;
+
+  color-scheme: dark;
+}
+
+/* Global Typography & Canvas */
+body {
+  font-family: var(--font-family-primary);
+  background: var(--body-bg);
+  color: var(--body-fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--body-fg);
+}
+
+/* Top Navigation Bar (matches HouseholdChores flat topbar) */
+#header {
+  background: var(--header-bg);
+  color: var(--header-color);
+  border-bottom: 1px solid var(--hairline-color);
+  padding: 12px 28px;
+  min-height: 58px;
+}
+
+#site-name {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.hc-admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--body-fg) !important;
+  text-decoration: none !important;
+  letter-spacing: -0.02em;
+}
+
+.hc-admin-brand img {
+  border-radius: 8px;
+  display: block;
+}
+
+.hc-admin-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--hc-tint);
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+#user-tools {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--body-quiet-color);
+}
+
+#user-tools a,
+#logout-form button {
+  color: var(--body-fg);
+  border-bottom: none;
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#user-tools a:hover,
+#logout-form button:hover {
+  background: var(--darkened-bg);
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.theme-toggle {
+  background: var(--darkened-bg);
+  border: 1px solid var(--hairline-color);
+  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  color: var(--body-fg);
+  transition: background-color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--hairline-color);
+}
+
+.theme-toggle svg.theme-icon-when-auto,
+.theme-toggle svg.theme-icon-when-dark,
+.theme-toggle svg.theme-icon-when-light {
+  color: var(--body-fg);
+  fill: var(--body-fg);
+}
+
+/* Breadcrumbs */
+div.breadcrumbs {
+  background: var(--breadcrumbs-bg);
+  color: var(--breadcrumbs-fg);
+  border-bottom: 1px solid var(--hairline-color);
+  padding: 10px 28px;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+div.breadcrumbs a {
+  color: var(--breadcrumbs-link-fg);
+}
+
+div.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+/* Main Content Area & Cards */
+#content {
+  padding: 24px 28px 40px;
+}
+
+.module,
+#content-related,
+#changelist-filter,
+.inline-group {
+  background: var(--hc-card);
+  border: 1px solid var(--hairline-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.05);
+}
+
+.module h2,
+.module caption,
+.inline-group h2,
+#changelist-filter h2,
+#content-related .module h2 {
+  background: var(--darkened-bg);
+  color: var(--body-fg);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--hairline-color);
+}
+
+.module caption a.section,
+.module h2 a {
+  color: var(--body-fg);
+}
+
+.module caption a.section:hover {
+  color: var(--primary);
+}
+
+/* Tables */
+table {
+  border-color: var(--hairline-color);
+}
+
+thead th {
+  background: var(--darkened-bg);
+  color: var(--body-quiet-color);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--hairline-color);
+  padding: 10px 12px;
+}
+
+tbody tr {
+  background: var(--hc-card);
+  transition: background-color 0.12s ease;
+}
+
+tbody tr:nth-child(odd) {
+  background: var(--hc-card);
+}
+
+tbody tr:hover {
+  background: var(--darkened-bg);
+}
+
+td, th {
+  border-bottom: 1px solid var(--hairline-color);
+  padding: 10px 12px;
+}
+
+/* Sidebar */
+#nav-sidebar {
+  background: var(--hc-card);
+  border-right: 1px solid var(--hairline-color);
+}
+
+#nav-sidebar .module {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+#nav-sidebar .current-model {
+  background: var(--hc-tint);
+}
+
+#nav-sidebar .current-model th a {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+#toggle-nav-sidebar {
+  background: var(--hc-card);
+  border-right: 1px solid var(--hairline-color);
+  color: var(--body-quiet-color);
+}
+
+#toggle-nav-sidebar:hover {
+  background: var(--darkened-bg);
+  color: var(--primary);
+}
+
+/* Inputs, Selects, Search & Filters */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+textarea,
+select,
+.vTextField {
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 11px;
+  background: var(--darkened-bg);
+  color: var(--body-fg);
+  font-family: var(--font-family-primary);
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--hc-card);
+  box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.18);
+}
+
+#changelist #toolbar {
+  background: var(--hc-card);
+  border: 1px solid var(--hairline-color);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+#changelist .actions {
+  background: var(--hc-card);
+  border: 1px solid var(--hairline-color);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+/* Buttons & Submit Rows */
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button,
+.object-tools a {
+  border-radius: 8px;
+  font-family: var(--font-family-primary);
+  font-weight: 600;
+  font-size: 0.86rem;
+  padding: 9px 15px;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: background-color 0.15s ease;
+}
+
+.submit-row {
+  background: var(--hc-card);
+  border: 1px solid var(--hairline-color);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.submit-row a.deletelink {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 9px 15px;
+  height: auto;
+  line-height: normal;
+}
+
+/* Messages / Outcome Toasts */
+ul.messagelist {
+  margin: 14px 28px 0;
+}
+
+ul.messagelist li {
+  border-radius: 10px;
+  border: 1px solid var(--hairline-color);
+  border-left: 4px solid var(--primary);
+  padding: 12px 16px 12px 44px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--body-fg);
+}
+
+ul.messagelist li.success {
+  border-left-color: var(--hc-ok);
+}
+
+ul.messagelist li.warning {
+  border-left-color: var(--hc-warn);
+}
+
+ul.messagelist li.error {
+  border-left-color: var(--error-fg);
+}
+
+/* Error Boxes */
+.errornote {
+  border-radius: 10px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: var(--hc-danger-tint);
+  color: var(--error-fg);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 11px 14px;
+}
+
+/* ============================================================
+   Clean Centered Admin Login Page (/admin/login/)
+   ============================================================ */
+body.login {
+  background: var(--body-bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+body.login #container {
+  width: 100%;
+  max-width: 420px;
+  min-width: 0;
+  margin: 0 auto;
+  background: var(--hc-card);
+  border: 1px solid var(--hairline-color);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(17, 24, 39, 0.08);
+  overflow: hidden;
+}
+
+html[data-theme="dark"] body.login #container {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+body.login #header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: var(--hc-card);
+  border-bottom: 1px solid var(--hairline-color);
+  min-height: 0;
+}
+
+body.login #branding {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+body.login #content {
+  padding: 24px;
+}
+
+.hc-login-intro {
+  margin-bottom: 20px;
+}
+
+.hc-login-intro h1 {
+  margin: 0 0 4px;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--body-fg);
+}
+
+.hc-login-intro p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--body-quiet-color);
+}
+
+body.login .form-row {
+  padding: 0;
+  margin-bottom: 16px;
+  border: none;
+}
+
+body.login .form-row label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--body-fg);
+  margin-bottom: 6px;
+  padding: 0;
+  line-height: 1.3;
+}
+
+body.login .form-row input[type="text"],
+body.login .form-row input[type="password"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 13px;
+  font-size: 0.94rem;
+}
+
+body.login .submit-row {
+  padding: 4px 0 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.login .submit-row input[type="submit"] {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.96rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hc-login-back {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 0.86rem;
+}
+
+.hc-login-back a {
+  color: var(--body-quiet-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hc-login-back a:hover {
+  color: var(--primary);
+}
