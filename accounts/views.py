@@ -53,6 +53,45 @@ class ProfileView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         return self.request.user
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from chores.models import Assignment
+        from households.models import HouseholdMember
+
+        membership = (
+            HouseholdMember.objects.select_related("household")
+            .filter(user=self.request.user, is_active=True)
+            .first()
+        )
+        my_stats = None
+        recent_done = []
+        if membership:
+            mine = Assignment.objects.filter(member=membership)
+            done = mine.filter(status=Assignment.Status.COMPLETED).count()
+            missed = mine.filter(status=Assignment.Status.MISSED).count()
+            pending = mine.filter(status=Assignment.Status.PENDING).count()
+            closed = done + missed
+            rate = round(done * 100 / closed) if closed else 0
+            active_members = HouseholdMember.objects.filter(
+                household=membership.household, is_active=True
+            ).count()
+            my_stats = {
+                "done": done,
+                "missed": missed,
+                "pending": pending,
+                "closed": closed,
+                "rate": rate,
+                "active_members": active_members,
+            }
+            recent_done = list(
+                mine.filter(status=Assignment.Status.COMPLETED)
+                .select_related("chore")
+                .order_by("-completed_at", "-week_start_date")[:4]
+            )
+        context["my_stats"] = my_stats
+        context["recent_done"] = recent_done
+        return context
+
     def form_valid(self, form):
         messages.success(self.request, "Your profile was updated.")
         return super().form_valid(form)

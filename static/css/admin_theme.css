@@ -834,3 +834,622 @@ body {
     font-size: 1.3rem;
   }
 }
+
+/* ============================================================
+   Synced Color Palettes from HouseholdChores Theme Switcher
+   ============================================================ */
+html[data-palette="emerald"] {
+  --hc-tint: #e6f6ee;
+  --primary: #0e8a55;
+  --secondary: #0a6e43;
+  --accent: #0e8a55;
+  --breadcrumbs-link-fg: #0e8a55;
+  --link-fg: #0e8a55;
+  --link-hover-color: #0a6e43;
+  --link-selected-fg: #0e8a55;
+  --selected-bg: #e6f6ee;
+  --selected-row: #e6f6ee;
+  --button-bg: #0e8a55;
+  --button-hover-bg: #0a6e43;
+  --default-button-bg: #0e8a55;
+  --default-button-hover-bg: #0a6e43;
+  --object-tools-bg: #0e8a55;
+  --object-tools-hover-bg: #0a6e43;
+}
+html[data-theme="dark"][data-palette="emerald"] {
+  --hc-tint: #163328;
+  --primary: #3fc48d;
+  --secondary: #2ea876;
+  --accent: #3fc48d;
+  --breadcrumbs-link-fg: #3fc48d;
+  --link-fg: #3fc48d;
+  --link-hover-color: #6ee7b7;
+  --link-selected-fg: #3fc48d;
+  --selected-bg: #163328;
+  --selected-row: #163328;
+  --button-bg: #3fc48d;
+  --button-hover-bg: #2ea876;
+  --default-button-bg: #3fc48d;
+  --default-button-hover-bg: #2ea876;
+  --object-tools-bg: #3fc48d;
+  --object-tools-hover-bg: #2ea876;
+}
+
+html[data-palette="violet"] {
+  --hc-tint: #f3ecff;
+  --primary: #7c3aed;
+  --secondary: #6d28d9;
+  --accent: #7c3aed;
+  --breadcrumbs-link-fg: #7c3aed;
+  --link-fg: #7c3aed;
+  --link-hover-color: #6d28d9;
+  --link-selected-fg: #7c3aed;
+  --selected-bg: #f3ecff;
+  --selected-row: #f3ecff;
+  --button-bg: #7c3aed;
+  --button-hover-bg: #6d28d9;
+  --default-button-bg: #7c3aed;
+  --default-button-hover-bg: #6d28d9;
+  --object-tools-bg: #7c3aed;
+  --object-tools-hover-bg: #6d28d9;
+}
+html[data-theme="dark"][data-palette="violet"] {
+  --hc-tint: #2a2142;
+  --primary: #a78bfa;
+  --secondary: #8b5cf6;
+  --accent: #a78bfa;
+  --breadcrumbs-link-fg: #a78bfa;
+  --link-fg: #a78bfa;
+  --link-hover-color: #c4b5fd;
+  --link-selected-fg: #a78bfa;
+  --selected-bg: #2a2142;
+  --selected-row: #2a2142;
+  --button-bg: #a78bfa;
+  --button-hover-bg: #8b5cf6;
+  --default-button-bg: #a78bfa;
+  --default-button-hover-bg: #8b5cf6;
+  --object-tools-bg: #a78bfa;
+  --object-tools-hover-bg: #8b5cf6;
+}
+
+html[data-palette="rose"] {
+  --hc-tint: #ffeef2;
+  --primary: #e11d48;
+  --secondary: #be123c;
+  --accent: #e11d48;
+  --breadcrumbs-link-fg: #e11d48;
+  --link-fg: #e11d48;
+  --link-hover-color: #be123c;
+  --link-selected-fg: #e11d48;
+  --selected-bg: #ffeef2;
+  --selected-row: #ffeef2;
+  --button-bg: #e11d48;
+  --button-hover-bg: #be123c;
+  --default-button-bg: #e11d48;
+  --default-button-hover-bg: #be123c;
+  --object-tools-bg: #e11d48;
+  --object-tools-hover-bg: #be123c;
+}
+html[data-theme="dark"][data-palette="rose"] {
+  --hc-tint: #3a1c24;
+  --primary: #fb7185;
+  --secondary: #f43f5e;
+  --accent: #fb7185;
+  --breadcrumbs-link-fg: #fb7185;
+  --link-fg: #fb7185;
+  --link-hover-color: #fda4af;
+  --link-selected-fg: #fb7185;
+  --selected-bg: #3a1c24;
+  --selected-row: #3a1c24;
+  --button-bg: #fb7185;
+  --button-hover-bg: #f43f5e;
+  --default-button-bg: #fb7185;
+  --default-button-hover-bg: #f43f5e;
+  --object-tools-bg: #fb7185;
+  --object-tools-hover-bg: #f43f5e;
+}
+
+html[data-palette="amber"] {
+  --hc-tint: #fef4e2;
+  --primary: #d97706;
+  --secondary: #b45309;
+  --accent: #d97706;
+  --breadcrumbs-link-fg: #d97706;
+  --link-fg: #d97706;
+  --link-hover-color: #b45309;
+  --link-selected-fg: #d97706;
+  --selected-bg: #fef4e2;
+  --selected-row: #fef4e2;
+  --button-bg: #d97706;
+  --button-hover-bg: #b45309;
+  --default-button-bg: #d97706;
+  --default-button-hover-bg: #b45309;
+  --object-tools-bg: #d97706;
+  --object-tools-hover-bg: #b45309;
+}
+html[data-theme="dark"][data-palette="amber"] {
+  --hc-tint: #362814;
+  --primary: #f59e0b;
+  --secondary: #d97706;
+  --accent: #f59e0b;
+  --button-fg: #121316;
+  --object-tools-fg: #121316;
+  --breadcrumbs-link-fg: #fbbf24;
+  --link-fg: #fbbf24;
+  --link-hover-color: #fcd34d;
+  --link-selected-fg: #fbbf24;
+  --selected-bg: #362814;
+  --selected-row: #362814;
+  --button-bg: #f59e0b;
+  --button-hover-bg: #d97706;
+  --default-button-bg: #f59e0b;
+  --default-button-hover-bg: #d97706;
+  --object-tools-bg: #f59e0b;
+  --object-tools-hover-bg: #d97706;
+}
+
+html[data-palette="slate"] {
+  --hc-tint: #e8e9ec;
+  --primary: #27272a;
+  --secondary: #18181b;
+  --accent: #27272a;
+  --breadcrumbs-link-fg: #27272a;
+  --link-fg: #27272a;
+  --link-hover-color: #18181b;
+  --link-selected-fg: #27272a;
+  --selected-bg: #e8e9ec;
+  --selected-row: #e8e9ec;
+  --button-bg: #27272a;
+  --button-hover-bg: #18181b;
+  --default-button-bg: #27272a;
+  --default-button-hover-bg: #18181b;
+  --object-tools-bg: #27272a;
+  --object-tools-hover-bg: #18181b;
+}
+html[data-theme="dark"][data-palette="slate"] {
+  --hc-tint: #2c2d33;
+  --primary: #d4d4d8;
+  --secondary: #a1a1aa;
+  --accent: #d4d4d8;
+  --button-fg: #121316;
+  --object-tools-fg: #121316;
+  --breadcrumbs-link-fg: #e4e4e7;
+  --link-fg: #e4e4e7;
+  --link-hover-color: #ffffff;
+  --link-selected-fg: #e4e4e7;
+  --selected-bg: #2c2d33;
+  --selected-row: #2c2d33;
+  --button-bg: #d4d4d8;
+  --button-hover-bg: #a1a1aa;
+  --default-button-bg: #d4d4d8;
+  --default-button-hover-bg: #a1a1aa;
+  --object-tools-bg: #d4d4d8;
+  --object-tools-hover-bg: #a1a1aa;
+}
+
+/* Additional Solid Palettes (Indigo, Sky, Teal, Pink) */
+html[data-palette="indigo"] {
+  --hc-tint: #eef2ff; --primary: #4f46e5; --secondary: #4338ca; --accent: #4f46e5;
+  --breadcrumbs-link-fg: #4f46e5; --link-fg: #4f46e5; --link-hover-color: #4338ca; --link-selected-fg: #4f46e5;
+  --selected-bg: #eef2ff; --selected-row: #eef2ff;
+  --button-bg: #4f46e5; --button-hover-bg: #4338ca; --default-button-bg: #4f46e5; --default-button-hover-bg: #4338ca;
+  --object-tools-bg: #4f46e5; --object-tools-hover-bg: #4338ca;
+}
+html[data-theme="dark"][data-palette="indigo"] {
+  --hc-tint: #23254a; --primary: #818cf8; --secondary: #6366f1; --accent: #818cf8;
+  --breadcrumbs-link-fg: #818cf8; --link-fg: #818cf8; --link-hover-color: #a5b4fc; --link-selected-fg: #818cf8;
+  --selected-bg: #23254a; --selected-row: #23254a;
+  --button-bg: #818cf8; --button-hover-bg: #6366f1; --default-button-bg: #818cf8; --default-button-hover-bg: #6366f1;
+  --object-tools-bg: #818cf8; --object-tools-hover-bg: #6366f1;
+}
+
+html[data-palette="sky"] {
+  --hc-tint: #e6f4fe; --primary: #0284c7; --secondary: #0369a1; --accent: #0284c7;
+  --breadcrumbs-link-fg: #0284c7; --link-fg: #0284c7; --link-hover-color: #0369a1; --link-selected-fg: #0284c7;
+  --selected-bg: #e6f4fe; --selected-row: #e6f4fe;
+  --button-bg: #0284c7; --button-hover-bg: #0369a1; --default-button-bg: #0284c7; --default-button-hover-bg: #0369a1;
+  --object-tools-bg: #0284c7; --object-tools-hover-bg: #0369a1;
+}
+html[data-theme="dark"][data-palette="sky"] {
+  --hc-tint: #152e42; --primary: #38bdf8; --secondary: #0ea5e9; --accent: #38bdf8;
+  --button-fg: #121316; --object-tools-fg: #121316;
+  --breadcrumbs-link-fg: #38bdf8; --link-fg: #38bdf8; --link-hover-color: #7dd3fc; --link-selected-fg: #38bdf8;
+  --selected-bg: #152e42; --selected-row: #152e42;
+  --button-bg: #38bdf8; --button-hover-bg: #0ea5e9; --default-button-bg: #38bdf8; --default-button-hover-bg: #0ea5e9;
+  --object-tools-bg: #38bdf8; --object-tools-hover-bg: #0ea5e9;
+}
+
+html[data-palette="teal"] {
+  --hc-tint: #e6f7f5; --primary: #0d9488; --secondary: #0f766e; --accent: #0d9488;
+  --breadcrumbs-link-fg: #0d9488; --link-fg: #0d9488; --link-hover-color: #0f766e; --link-selected-fg: #0d9488;
+  --selected-bg: #e6f7f5; --selected-row: #e6f7f5;
+  --button-bg: #0d9488; --button-hover-bg: #0f766e; --default-button-bg: #0d9488; --default-button-hover-bg: #0f766e;
+  --object-tools-bg: #0d9488; --object-tools-hover-bg: #0f766e;
+}
+html[data-theme="dark"][data-palette="teal"] {
+  --hc-tint: #143330; --primary: #2dd4bf; --secondary: #14b8a6; --accent: #2dd4bf;
+  --button-fg: #121316; --object-tools-fg: #121316;
+  --breadcrumbs-link-fg: #2dd4bf; --link-fg: #2dd4bf; --link-hover-color: #5eead4; --link-selected-fg: #2dd4bf;
+  --selected-bg: #143330; --selected-row: #143330;
+  --button-bg: #2dd4bf; --button-hover-bg: #14b8a6; --default-button-bg: #2dd4bf; --default-button-hover-bg: #14b8a6;
+  --object-tools-bg: #2dd4bf; --object-tools-hover-bg: #14b8a6;
+}
+
+html[data-palette="pink"] {
+  --hc-tint: #fcebf3; --primary: #db2777; --secondary: #be185d; --accent: #db2777;
+  --breadcrumbs-link-fg: #db2777; --link-fg: #db2777; --link-hover-color: #be185d; --link-selected-fg: #db2777;
+  --selected-bg: #fcebf3; --selected-row: #fcebf3;
+  --button-bg: #db2777; --button-hover-bg: #be185d; --default-button-bg: #db2777; --default-button-hover-bg: #be185d;
+  --object-tools-bg: #db2777; --object-tools-hover-bg: #be185d;
+}
+html[data-theme="dark"][data-palette="pink"] {
+  --hc-tint: #3a1c2d; --primary: #f472b6; --secondary: #ec4899; --accent: #f472b6;
+  --button-fg: #121316; --object-tools-fg: #121316;
+  --breadcrumbs-link-fg: #f472b6; --link-fg: #f472b6; --link-hover-color: #f9a8d4; --link-selected-fg: #f472b6;
+  --selected-bg: #3a1c2d; --selected-row: #3a1c2d;
+  --button-bg: #f472b6; --button-hover-bg: #ec4899; --default-button-bg: #f472b6; --default-button-hover-bg: #ec4899;
+  --object-tools-bg: #f472b6; --object-tools-hover-bg: #ec4899;
+}
+
+/* Color Combinations (Ocean, Sunset, Forest, Lavender, Mocha, Nordic) */
+html[data-palette="ocean"] {
+  --body-bg: #edf5fa; --hc-card: #f8fcff; --header-bg: #f8fcff; --breadcrumbs-bg: #f8fcff;
+  --darkened-bg: #e6f0f7; --hairline-color: #cfe0ec; --border-color: #bed3e3;
+  --hc-tint: #dff1fb; --primary: #0369a1; --secondary: #075985; --accent: #0369a1;
+  --breadcrumbs-link-fg: #0369a1; --link-fg: #0369a1; --link-hover-color: #075985; --link-selected-fg: #0369a1;
+  --selected-bg: #dff1fb; --selected-row: #dff1fb;
+  --button-bg: #0369a1; --button-hover-bg: #075985; --default-button-bg: #0369a1; --default-button-hover-bg: #075985;
+  --object-tools-bg: #0369a1; --object-tools-hover-bg: #075985;
+}
+html[data-theme="dark"][data-palette="ocean"] {
+  --body-bg: #0c1721; --hc-card: #132230; --header-bg: #132230; --breadcrumbs-bg: #132230;
+  --darkened-bg: #1a2d3e; --hairline-color: #233c52; --border-color: #2b4963;
+  --hc-tint: #15344a; --primary: #38bdf8; --secondary: #0ea5e9; --accent: #38bdf8;
+  --button-fg: #0c1721; --object-tools-fg: #0c1721;
+  --breadcrumbs-link-fg: #38bdf8; --link-fg: #38bdf8; --link-hover-color: #7dd3fc; --link-selected-fg: #38bdf8;
+  --selected-bg: #15344a; --selected-row: #15344a;
+  --button-bg: #38bdf8; --button-hover-bg: #0ea5e9; --default-button-bg: #38bdf8; --default-button-hover-bg: #0ea5e9;
+  --object-tools-bg: #38bdf8; --object-tools-hover-bg: #0ea5e9;
+}
+
+html[data-palette="sunset"] {
+  --body-bg: #faf1ec; --hc-card: #fffaf7; --header-bg: #fffaf7; --breadcrumbs-bg: #fffaf7;
+  --darkened-bg: #f5e7df; --hairline-color: #ebd6ca; --border-color: #dfc3b3;
+  --hc-tint: #fdece3; --primary: #ea580c; --secondary: #c2410c; --accent: #ea580c;
+  --breadcrumbs-link-fg: #ea580c; --link-fg: #ea580c; --link-hover-color: #c2410c; --link-selected-fg: #ea580c;
+  --selected-bg: #fdece3; --selected-row: #fdece3;
+  --button-bg: #ea580c; --button-hover-bg: #c2410c; --default-button-bg: #ea580c; --default-button-hover-bg: #c2410c;
+  --object-tools-bg: #ea580c; --object-tools-hover-bg: #c2410c;
+}
+html[data-theme="dark"][data-palette="sunset"] {
+  --body-bg: #191214; --hc-card: #24191c; --header-bg: #24191c; --breadcrumbs-bg: #24191c;
+  --darkened-bg: #2f2024; --hairline-color: #402c32; --border-color: #523840;
+  --hc-tint: #3d2224; --primary: #fb923c; --secondary: #f97316; --accent: #fb923c;
+  --button-fg: #191214; --object-tools-fg: #191214;
+  --breadcrumbs-link-fg: #fb923c; --link-fg: #fb923c; --link-hover-color: #fdba74; --link-selected-fg: #fb923c;
+  --selected-bg: #3d2224; --selected-row: #3d2224;
+  --button-bg: #fb923c; --button-hover-bg: #f97316; --default-button-bg: #fb923c; --default-button-hover-bg: #f97316;
+  --object-tools-bg: #fb923c; --object-tools-hover-bg: #f97316;
+}
+
+html[data-palette="forest"] {
+  --body-bg: #eef4ef; --hc-card: #fafcf9; --header-bg: #fafcf9; --breadcrumbs-bg: #fafcf9;
+  --darkened-bg: #e5eee6; --hairline-color: #d0dfd2; --border-color: #bcd0bf;
+  --hc-tint: #e2f4e8; --primary: #15803d; --secondary: #166534; --accent: #15803d;
+  --breadcrumbs-link-fg: #15803d; --link-fg: #15803d; --link-hover-color: #166534; --link-selected-fg: #15803d;
+  --selected-bg: #e2f4e8; --selected-row: #e2f4e8;
+  --button-bg: #15803d; --button-hover-bg: #166534; --default-button-bg: #15803d; --default-button-hover-bg: #166534;
+  --object-tools-bg: #15803d; --object-tools-hover-bg: #166534;
+}
+html[data-theme="dark"][data-palette="forest"] {
+  --body-bg: #0e1612; --hc-card: #16221c; --header-bg: #16221c; --breadcrumbs-bg: #16221c;
+  --darkened-bg: #1d2d25; --hairline-color: #293e33; --border-color: #355042;
+  --hc-tint: #183625; --primary: #4ade80; --secondary: #22c55e; --accent: #4ade80;
+  --button-fg: #0e1612; --object-tools-fg: #0e1612;
+  --breadcrumbs-link-fg: #4ade80; --link-fg: #4ade80; --link-hover-color: #86efac; --link-selected-fg: #4ade80;
+  --selected-bg: #183625; --selected-row: #183625;
+  --button-bg: #4ade80; --button-hover-bg: #22c55e; --default-button-bg: #4ade80; --default-button-hover-bg: #22c55e;
+  --object-tools-bg: #4ade80; --object-tools-hover-bg: #22c55e;
+}
+
+html[data-palette="lavender"] {
+  --body-bg: #f3f1fa; --hc-card: #fcfbff; --header-bg: #fcfbff; --breadcrumbs-bg: #fcfbff;
+  --darkened-bg: #eae6f7; --hairline-color: #dad3ee; --border-color: #c8bee6;
+  --hc-tint: #ede9fe; --primary: #6366f1; --secondary: #4f46e5; --accent: #6366f1;
+  --breadcrumbs-link-fg: #6366f1; --link-fg: #6366f1; --link-hover-color: #4f46e5; --link-selected-fg: #6366f1;
+  --selected-bg: #ede9fe; --selected-row: #ede9fe;
+  --button-bg: #6366f1; --button-hover-bg: #4f46e5; --default-button-bg: #6366f1; --default-button-hover-bg: #4f46e5;
+  --object-tools-bg: #6366f1; --object-tools-hover-bg: #4f46e5;
+}
+html[data-theme="dark"][data-palette="lavender"] {
+  --body-bg: #13111c; --hc-card: #1c1929; --header-bg: #1c1929; --breadcrumbs-bg: #1c1929;
+  --darkened-bg: #252136; --hairline-color: #342f4a; --border-color: #433c5e;
+  --hc-tint: #282347; --primary: #818cf8; --secondary: #6366f1; --accent: #818cf8;
+  --breadcrumbs-link-fg: #818cf8; --link-fg: #818cf8; --link-hover-color: #c4b5fd; --link-selected-fg: #818cf8;
+  --selected-bg: #282347; --selected-row: #282347;
+  --button-bg: #818cf8; --button-hover-bg: #6366f1; --default-button-bg: #818cf8; --default-button-hover-bg: #6366f1;
+  --object-tools-bg: #818cf8; --object-tools-hover-bg: #6366f1;
+}
+
+html[data-palette="coffee"] {
+  --body-bg: #f5f0e9; --hc-card: #fdfbf7; --header-bg: #fdfbf7; --breadcrumbs-bg: #fdfbf7;
+  --darkened-bg: #ede5da; --hairline-color: #dfd4c5; --border-color: #cfc0ad;
+  --hc-tint: #f6ead9; --primary: #92400e; --secondary: #78350f; --accent: #92400e;
+  --breadcrumbs-link-fg: #92400e; --link-fg: #92400e; --link-hover-color: #78350f; --link-selected-fg: #92400e;
+  --selected-bg: #f6ead9; --selected-row: #f6ead9;
+  --button-bg: #92400e; --button-hover-bg: #78350f; --default-button-bg: #92400e; --default-button-hover-bg: #78350f;
+  --object-tools-bg: #92400e; --object-tools-hover-bg: #78350f;
+}
+html[data-theme="dark"][data-palette="coffee"] {
+  --body-bg: #171310; --hc-card: #221c17; --header-bg: #221c17; --breadcrumbs-bg: #221c17;
+  --darkened-bg: #2d251f; --hairline-color: #3d332b; --border-color: #4f4238;
+  --hc-tint: #382a1a; --primary: #f59e0b; --secondary: #d97706; --accent: #f59e0b;
+  --button-fg: #171310; --object-tools-fg: #171310;
+  --breadcrumbs-link-fg: #fbbf24; --link-fg: #fbbf24; --link-hover-color: #fcd34d; --link-selected-fg: #fbbf24;
+  --selected-bg: #382a1a; --selected-row: #382a1a;
+  --button-bg: #f59e0b; --button-hover-bg: #d97706; --default-button-bg: #f59e0b; --default-button-hover-bg: #d97706;
+  --object-tools-bg: #f59e0b; --object-tools-hover-bg: #d97706;
+}
+
+html[data-palette="nord"] {
+  --body-bg: #edf1f6; --hc-card: #f8fafd; --header-bg: #f8fafd; --breadcrumbs-bg: #f8fafd;
+  --darkened-bg: #e3eaf2; --hairline-color: #cfd9e6; --border-color: #bcc9db;
+  --hc-tint: #e3eefc; --primary: #3b82f6; --secondary: #2563eb; --accent: #3b82f6;
+  --breadcrumbs-link-fg: #3b82f6; --link-fg: #3b82f6; --link-hover-color: #2563eb; --link-selected-fg: #3b82f6;
+  --selected-bg: #e3eefc; --selected-row: #e3eefc;
+  --button-bg: #3b82f6; --button-hover-bg: #2563eb; --default-button-bg: #3b82f6; --default-button-hover-bg: #2563eb;
+  --object-tools-bg: #3b82f6; --object-tools-hover-bg: #2563eb;
+}
+html[data-theme="dark"][data-palette="nord"] {
+  --body-bg: #171c26; --hc-card: #202735; --header-bg: #202735; --breadcrumbs-bg: #202735;
+  --darkened-bg: #283142; --hairline-color: #344056; --border-color: #42516d;
+  --hc-tint: #23344d; --primary: #60a5fa; --secondary: #3b82f6; --accent: #60a5fa;
+  --button-fg: #171c26; --object-tools-fg: #171c26;
+  --breadcrumbs-link-fg: #60a5fa; --link-fg: #60a5fa; --link-hover-color: #93c5fd; --link-selected-fg: #60a5fa;
+  --selected-bg: #23344d; --selected-row: #23344d;
+  --button-bg: #60a5fa; --button-hover-bg: #3b82f6; --default-button-bg: #60a5fa; --default-button-hover-bg: #3b82f6;
+  --object-tools-bg: #60a5fa; --object-tools-hover-bg: #3b82f6;
+}
+
+/* Additional Color Combinations (Sakura, Matcha, Cyber, Royal, Tropical, Aurora, Berry, Citrus, Ruby) */
+html[data-palette="cherry"] {
+  --body-bg: #fbf0f4; --hc-card: #fffafc; --header-bg: #fffafc; --breadcrumbs-bg: #fffafc;
+  --darkened-bg: #f7e4ec; --hairline-color: #edd0dc; --border-color: #e0b8c9;
+  --hc-tint: #fde7f1; --primary: #db2777; --secondary: #be185d; --accent: #db2777;
+  --breadcrumbs-link-fg: #db2777; --link-fg: #db2777; --link-hover-color: #be185d; --link-selected-fg: #db2777;
+  --selected-bg: #fde7f1; --selected-row: #fde7f1;
+  --button-bg: #db2777; --button-hover-bg: #be185d; --default-button-bg: #db2777; --default-button-hover-bg: #be185d;
+  --object-tools-bg: #db2777; --object-tools-hover-bg: #be185d;
+}
+html[data-theme="dark"][data-palette="cherry"] {
+  --body-bg: #1a1116; --hc-card: #251820; --header-bg: #251820; --breadcrumbs-bg: #251820;
+  --darkened-bg: #31202a; --hairline-color: #452d3c; --border-color: #57384b;
+  --hc-tint: #3f2031; --primary: #f472b6; --secondary: #ec4899; --accent: #f472b6;
+  --button-fg: #1a1116; --object-tools-fg: #1a1116;
+  --breadcrumbs-link-fg: #f472b6; --link-fg: #f472b6; --link-hover-color: #f9a8d4; --link-selected-fg: #f472b6;
+  --selected-bg: #3f2031; --selected-row: #3f2031;
+  --button-bg: #f472b6; --button-hover-bg: #ec4899; --default-button-bg: #f472b6; --default-button-hover-bg: #ec4899;
+  --object-tools-bg: #f472b6; --object-tools-hover-bg: #ec4899;
+}
+
+html[data-palette="mint"] {
+  --body-bg: #eff6f0; --hc-card: #fafdfa; --header-bg: #fafdfa; --breadcrumbs-bg: #fafdfa;
+  --darkened-bg: #e5f1e7; --hairline-color: #cfe3d2; --border-color: #b8d3bc;
+  --hc-tint: #e1f7ed; --primary: #059669; --secondary: #047857; --accent: #059669;
+  --breadcrumbs-link-fg: #059669; --link-fg: #059669; --link-hover-color: #047857; --link-selected-fg: #059669;
+  --selected-bg: #e1f7ed; --selected-row: #e1f7ed;
+  --button-bg: #059669; --button-hover-bg: #047857; --default-button-bg: #059669; --default-button-hover-bg: #047857;
+  --object-tools-bg: #059669; --object-tools-hover-bg: #047857;
+}
+html[data-theme="dark"][data-palette="mint"] {
+  --body-bg: #0f1713; --hc-card: #16231d; --header-bg: #16231d; --breadcrumbs-bg: #16231d;
+  --darkened-bg: #1e2f27; --hairline-color: #2a4136; --border-color: #365446;
+  --hc-tint: #16372a; --primary: #34d399; --secondary: #10b981; --accent: #34d399;
+  --button-fg: #0f1713; --object-tools-fg: #0f1713;
+  --breadcrumbs-link-fg: #34d399; --link-fg: #34d399; --link-hover-color: #6ee7b7; --link-selected-fg: #34d399;
+  --selected-bg: #16372a; --selected-row: #16372a;
+  --button-bg: #34d399; --button-hover-bg: #10b981; --default-button-bg: #34d399; --default-button-hover-bg: #10b981;
+  --object-tools-bg: #34d399; --object-tools-hover-bg: #10b981;
+}
+
+html[data-palette="cyber"] {
+  --body-bg: #eef3fa; --hc-card: #fafcff; --header-bg: #fafcff; --breadcrumbs-bg: #fafcff;
+  --darkened-bg: #e4ecf7; --hairline-color: #cfdcef; --border-color: #b9cbe4;
+  --hc-tint: #e0f5fa; --primary: #0891b2; --secondary: #0e7490; --accent: #0891b2;
+  --breadcrumbs-link-fg: #0891b2; --link-fg: #0891b2; --link-hover-color: #0e7490; --link-selected-fg: #0891b2;
+  --selected-bg: #e0f5fa; --selected-row: #e0f5fa;
+  --button-bg: #0891b2; --button-hover-bg: #0e7490; --default-button-bg: #0891b2; --default-button-hover-bg: #0e7490;
+  --object-tools-bg: #0891b2; --object-tools-hover-bg: #0e7490;
+}
+html[data-theme="dark"][data-palette="cyber"] {
+  --body-bg: #0e101c; --hc-card: #16192b; --header-bg: #16192b; --breadcrumbs-bg: #16192b;
+  --darkened-bg: #1f233b; --hairline-color: #2d3354; --border-color: #3b436e;
+  --hc-tint: #173347; --primary: #22d3ee; --secondary: #06b6d4; --accent: #22d3ee;
+  --button-fg: #0e101c; --object-tools-fg: #0e101c;
+  --breadcrumbs-link-fg: #22d3ee; --link-fg: #22d3ee; --link-hover-color: #67e8f9; --link-selected-fg: #22d3ee;
+  --selected-bg: #173347; --selected-row: #173347;
+  --button-bg: #22d3ee; --button-hover-bg: #06b6d4; --default-button-bg: #22d3ee; --default-button-hover-bg: #06b6d4;
+  --object-tools-bg: #22d3ee; --object-tools-hover-bg: #06b6d4;
+}
+
+html[data-palette="royal"] {
+  --body-bg: #f2f3f8; --hc-card: #fdfdff; --header-bg: #fdfdff; --breadcrumbs-bg: #fdfdff;
+  --darkened-bg: #e9ecf5; --hairline-color: #d5dbe9; --border-color: #c1cadf;
+  --hc-tint: #e7eeff; --primary: #1d4ed8; --secondary: #1e40af; --accent: #1d4ed8;
+  --breadcrumbs-link-fg: #1d4ed8; --link-fg: #1d4ed8; --link-hover-color: #1e40af; --link-selected-fg: #1d4ed8;
+  --selected-bg: #e7eeff; --selected-row: #e7eeff;
+  --button-bg: #1d4ed8; --button-hover-bg: #1e40af; --default-button-bg: #1d4ed8; --default-button-hover-bg: #1e40af;
+  --object-tools-bg: #1d4ed8; --object-tools-hover-bg: #1e40af;
+}
+html[data-theme="dark"][data-palette="royal"] {
+  --body-bg: #101421; --hc-card: #181e30; --header-bg: #181e30; --breadcrumbs-bg: #181e30;
+  --darkened-bg: #212940; --hairline-color: #2e3957; --border-color: #3c4a70;
+  --hc-tint: #1e2f52; --primary: #60a5fa; --secondary: #3b82f6; --accent: #60a5fa;
+  --button-fg: #101421; --object-tools-fg: #101421;
+  --breadcrumbs-link-fg: #60a5fa; --link-fg: #60a5fa; --link-hover-color: #93c5fd; --link-selected-fg: #60a5fa;
+  --selected-bg: #1e2f52; --selected-row: #1e2f52;
+  --button-bg: #60a5fa; --button-hover-bg: #3b82f6; --default-button-bg: #60a5fa; --default-button-hover-bg: #3b82f6;
+  --object-tools-bg: #60a5fa; --object-tools-hover-bg: #3b82f6;
+}
+
+html[data-palette="coral"] {
+  --body-bg: #f9f3f0; --hc-card: #fffcfb; --header-bg: #fffcfb; --breadcrumbs-bg: #fffcfb;
+  --darkened-bg: #f2e9e4; --hairline-color: #e5d7cf; --border-color: #d6c3b8;
+  --hc-tint: #fde8ed; --primary: #e11d48; --secondary: #be123c; --accent: #e11d48;
+  --breadcrumbs-link-fg: #e11d48; --link-fg: #e11d48; --link-hover-color: #be123c; --link-selected-fg: #e11d48;
+  --selected-bg: #fde8ed; --selected-row: #fde8ed;
+  --button-bg: #e11d48; --button-hover-bg: #be123c; --default-button-bg: #e11d48; --default-button-hover-bg: #be123c;
+  --object-tools-bg: #e11d48; --object-tools-hover-bg: #be123c;
+}
+html[data-theme="dark"][data-palette="coral"] {
+  --body-bg: #171314; --hc-card: #221b1d; --header-bg: #221b1d; --breadcrumbs-bg: #221b1d;
+  --darkened-bg: #2c2326; --hairline-color: #3e3136; --border-color: #503f45;
+  --hc-tint: #3d2029; --primary: #fb7185; --secondary: #f43f5e; --accent: #fb7185;
+  --button-fg: #171314; --object-tools-fg: #171314;
+  --breadcrumbs-link-fg: #fb7185; --link-fg: #fb7185; --link-hover-color: #fda4af; --link-selected-fg: #fb7185;
+  --selected-bg: #3d2029; --selected-row: #3d2029;
+  --button-bg: #fb7185; --button-hover-bg: #f43f5e; --default-button-bg: #fb7185; --default-button-hover-bg: #f43f5e;
+  --object-tools-bg: #fb7185; --object-tools-hover-bg: #f43f5e;
+}
+
+html[data-palette="aurora"] {
+  --body-bg: #eff5f6; --hc-card: #f9fcfd; --header-bg: #f9fcfd; --breadcrumbs-bg: #f9fcfd;
+  --darkened-bg: #e5eff1; --hairline-color: #cfe0e4; --border-color: #b8cfd5;
+  --hc-tint: #e1f6ef; --primary: #059669; --secondary: #047857; --accent: #059669;
+  --breadcrumbs-link-fg: #059669; --link-fg: #059669; --link-hover-color: #047857; --link-selected-fg: #059669;
+  --selected-bg: #e1f6ef; --selected-row: #e1f6ef;
+  --button-bg: #059669; --button-hover-bg: #047857; --default-button-bg: #059669; --default-button-hover-bg: #047857;
+  --object-tools-bg: #059669; --object-tools-hover-bg: #047857;
+}
+html[data-theme="dark"][data-palette="aurora"] {
+  --body-bg: #0e151a; --hc-card: #152028; --header-bg: #152028; --breadcrumbs-bg: #152028;
+  --darkened-bg: #1d2b35; --hairline-color: #293c4a; --border-color: #364f61;
+  --hc-tint: #163632; --primary: #34d399; --secondary: #10b981; --accent: #34d399;
+  --button-fg: #0e151a; --object-tools-fg: #0e151a;
+  --breadcrumbs-link-fg: #34d399; --link-fg: #34d399; --link-hover-color: #6ee7b7; --link-selected-fg: #34d399;
+  --selected-bg: #163632; --selected-row: #163632;
+  --button-bg: #34d399; --button-hover-bg: #10b981; --default-button-bg: #34d399; --default-button-hover-bg: #10b981;
+  --object-tools-bg: #34d399; --object-tools-hover-bg: #10b981;
+}
+
+html[data-palette="berry"] {
+  --body-bg: #f7f0f9; --hc-card: #fdfaff; --header-bg: #fdfaff; --breadcrumbs-bg: #fdfaff;
+  --darkened-bg: #efe4f4; --hairline-color: #e0cfe8; --border-color: #ceb6da;
+  --hc-tint: #f3e8ff; --primary: #9333ea; --secondary: #7e22ce; --accent: #9333ea;
+  --breadcrumbs-link-fg: #9333ea; --link-fg: #9333ea; --link-hover-color: #7e22ce; --link-selected-fg: #9333ea;
+  --selected-bg: #f3e8ff; --selected-row: #f3e8ff;
+  --button-bg: #9333ea; --button-hover-bg: #7e22ce; --default-button-bg: #9333ea; --default-button-hover-bg: #7e22ce;
+  --object-tools-bg: #9333ea; --object-tools-hover-bg: #7e22ce;
+}
+html[data-theme="dark"][data-palette="berry"] {
+  --body-bg: #17101c; --hc-card: #22172a; --header-bg: #22172a; --breadcrumbs-bg: #22172a;
+  --darkened-bg: #2d1f38; --hairline-color: #402c4f; --border-color: #523866;
+  --hc-tint: #352147; --primary: #c084fc; --secondary: #a855f7; --accent: #c084fc;
+  --button-fg: #17101c; --object-tools-fg: #17101c;
+  --breadcrumbs-link-fg: #c084fc; --link-fg: #c084fc; --link-hover-color: #d8b4fe; --link-selected-fg: #c084fc;
+  --selected-bg: #352147; --selected-row: #352147;
+  --button-bg: #c084fc; --button-hover-bg: #a855f7; --default-button-bg: #c084fc; --default-button-hover-bg: #a855f7;
+  --object-tools-bg: #c084fc; --object-tools-hover-bg: #a855f7;
+}
+
+html[data-palette="citrus"] {
+  --body-bg: #f8f6ec; --hc-card: #fffef8; --header-bg: #fffef8; --breadcrumbs-bg: #fffef8;
+  --darkened-bg: #f1eee0; --hairline-color: #e3dec9; --border-color: #d2cbb0;
+  --hc-tint: #feefe3; --primary: #ea580c; --secondary: #c2410c; --accent: #ea580c;
+  --breadcrumbs-link-fg: #ea580c; --link-fg: #ea580c; --link-hover-color: #c2410c; --link-selected-fg: #ea580c;
+  --selected-bg: #feefe3; --selected-row: #feefe3;
+  --button-bg: #ea580c; --button-hover-bg: #c2410c; --default-button-bg: #ea580c; --default-button-hover-bg: #c2410c;
+  --object-tools-bg: #ea580c; --object-tools-hover-bg: #c2410c;
+}
+html[data-theme="dark"][data-palette="citrus"] {
+  --body-bg: #16150f; --hc-card: #212017; --header-bg: #212017; --breadcrumbs-bg: #212017;
+  --darkened-bg: #2c2a1e; --hairline-color: #3e3b2b; --border-color: #504c37;
+  --hc-tint: #3b2a19; --primary: #fb923c; --secondary: #f97316; --accent: #fb923c;
+  --button-fg: #16150f; --object-tools-fg: #16150f;
+  --breadcrumbs-link-fg: #fb923c; --link-fg: #fb923c; --link-hover-color: #fdba74; --link-selected-fg: #fb923c;
+  --selected-bg: #3b2a19; --selected-row: #3b2a19;
+  --button-bg: #fb923c; --button-hover-bg: #f97316; --default-button-bg: #fb923c; --default-button-hover-bg: #f97316;
+  --object-tools-bg: #fb923c; --object-tools-hover-bg: #f97316;
+}
+
+html[data-palette="midnight"] {
+  --body-bg: #f1f2f5; --hc-card: #fcfcfd; --header-bg: #fcfcfd; --breadcrumbs-bg: #fcfcfd;
+  --darkened-bg: #e7e9ef; --hairline-color: #d4d8e2; --border-color: #c1c6d4;
+  --hc-tint: #fdeaea; --primary: #dc2626; --secondary: #b91c1c; --accent: #dc2626;
+  --breadcrumbs-link-fg: #dc2626; --link-fg: #dc2626; --link-hover-color: #b91c1c; --link-selected-fg: #dc2626;
+  --selected-bg: #fdeaea; --selected-row: #fdeaea;
+  --button-bg: #dc2626; --button-hover-bg: #b91c1c; --default-button-bg: #dc2626; --default-button-hover-bg: #b91c1c;
+  --object-tools-bg: #dc2626; --object-tools-hover-bg: #b91c1c;
+}
+html[data-theme="dark"][data-palette="midnight"] {
+  --body-bg: #111318; --hc-card: #1a1d24; --header-bg: #1a1d24; --breadcrumbs-bg: #1a1d24;
+  --darkened-bg: #232730; --hairline-color: #323744; --border-color: #424859;
+  --hc-tint: #3a1f23; --primary: #f87171; --secondary: #ef4444; --accent: #f87171;
+  --button-fg: #111318; --object-tools-fg: #111318;
+  --breadcrumbs-link-fg: #f87171; --link-fg: #f87171; --link-hover-color: #fca5a5; --link-selected-fg: #f87171;
+  --selected-bg: #3a1f23; --selected-row: #3a1f23;
+  --button-bg: #f87171; --button-hover-bg: #ef4444; --default-button-bg: #f87171; --default-button-hover-bg: #ef4444;
+  --object-tools-bg: #f87171; --object-tools-hover-bg: #ef4444;
+}
+
+/* ============================================================
+   Kinetic Micro-Interactions for Django Admin
+   ============================================================ */
+@keyframes adminFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#content-main,
+#content-related,
+body.login #container {
+  animation: adminFadeUp 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.module,
+#changelist #toolbar,
+#changelist .actions,
+.submit-row {
+  transition: box-shadow 0.22s ease, border-color 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.module:hover {
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.08);
+}
+
+.button,
+input[type="submit"],
+.object-tools a {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, box-shadow 0.2s ease;
+}
+
+.button:hover,
+input[type="submit"]:hover,
+.object-tools a:hover {
+  transform: translateY(-1px);
+}
+
+.button:active,
+input[type="submit"]:active,
+.object-tools a:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #content-main,
+  #content-related,
+  body.login #container {
+    animation: none !important;
+  }
+  .button:hover,
+  input[type="submit"]:hover,
+  .object-tools a:hover {
+    transform: none !important;
+  }
+}

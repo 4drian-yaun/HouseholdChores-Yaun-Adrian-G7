@@ -12,6 +12,8 @@
                 var saved = localStorage.getItem("hc-theme");
                 var theme = saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
                 document.documentElement.setAttribute("data-theme", theme);
+                var palette = localStorage.getItem("hc-palette") || "blue";
+                document.documentElement.setAttribute("data-palette", palette);
                 var meta = document.getElementById("themeColorMeta");
                 if (meta) meta.setAttribute("content", theme === "dark" ? "#1c1e21" : "#fcfcfd");
             })();
@@ -19,20 +21,169 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=13">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=34">
     </head>
     <body>
+        <div class="scroll-progress-track" aria-hidden="true">
+            <div class="scroll-progress-bar" data-scroll-progress></div>
+        </div>
         <header class="topbar" id="topbar">
             <div class="topbar-inner">
                 <a class="brand" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">
-                    <img src="{% static 'img/logo.svg' %}?v=11" alt="" width="34" height="34">
+                    <svg class="brand-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="hcBrandGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" class="brand-stop-1"/>
+                                <stop offset="100%" class="brand-stop-2"/>
+                            </linearGradient>
+                        </defs>
+                        <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#hcBrandGrad)"/>
+                        <rect x="2.75" y="2.75" width="58.5" height="58.5" rx="14.25" fill="none" stroke="#FFFFFF" stroke-opacity="0.2" stroke-width="1.5"/>
+                        <g fill="none" stroke="#FFFFFF" stroke-opacity="0.72" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M 14.68 22 A 20 20 0 0 1 46.14 17.86"/>
+                            <path d="M 41.6 17.9 L 46.2 17.9 L 46.2 13.3"/>
+                            <path d="M 49.32 42 A 20 20 0 0 1 17.86 46.14"/>
+                            <path d="M 22.4 46.1 L 17.8 46.1 L 17.8 50.7"/>
+                        </g>
+                        <path d="M 32 20.8 L 43.8 30.8 V 41.2 Q 43.8 43.6 41.4 43.6 H 22.6 Q 20.2 43.6 20.2 41.2 V 30.8 Z" fill="#FCFCFD" stroke="#FCFCFD" stroke-width="2.2" stroke-linejoin="round"/>
+                        <path d="M 26.8 35.3 L 30.5 38.9 L 37.6 31.4" fill="none" class="brand-check" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                     <span>HouseholdChores</span>
                 </a>
                 <div class="topbar-controls">
-                    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle light / dark mode">
-                        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-                    </button>
+                    <div class="palette-picker" id="palettePicker">
+                        <button type="button" class="theme-toggle palette-toggle" id="paletteToggle" aria-label="Change theme and color palette" title="Theme &amp; color palette" aria-expanded="false" aria-controls="palettePopover">
+                            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                        </button>
+                        <div class="palette-popover" id="palettePopover" role="dialog" aria-label="Theme settings" hidden>
+                            <div class="palette-section">
+                                <span class="palette-heading">Appearance</span>
+                                <div class="mode-switch" role="group" aria-label="Appearance mode">
+                                    <button type="button" class="mode-btn" data-theme-choice="light">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                                        Light
+                                    </button>
+                                    <button type="button" class="mode-btn" data-theme-choice="dark">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                                        Dark
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="palette-divider"></div>
+                            <div class="palette-section">
+                                <span class="palette-heading">Solid colors</span>
+                                <div class="palette-grid palette-grid-solids" role="group" aria-label="Solid color palettes">
+                                    <button type="button" class="palette-swatch" data-palette-choice="blue" aria-label="Blue theme" title="Blue">
+                                        <span class="swatch-circle" style="--sw: #1877f2"></span>
+                                        <span class="swatch-name">Blue</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="indigo" aria-label="Indigo theme" title="Indigo">
+                                        <span class="swatch-circle" style="--sw: #4f46e5"></span>
+                                        <span class="swatch-name">Indigo</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="sky" aria-label="Sky theme" title="Sky">
+                                        <span class="swatch-circle" style="--sw: #0284c7"></span>
+                                        <span class="swatch-name">Sky</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="teal" aria-label="Teal theme" title="Teal">
+                                        <span class="swatch-circle" style="--sw: #0d9488"></span>
+                                        <span class="swatch-name">Teal</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="emerald" aria-label="Emerald theme" title="Emerald">
+                                        <span class="swatch-circle" style="--sw: #0e8a55"></span>
+                                        <span class="swatch-name">Emerald</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="violet" aria-label="Violet theme" title="Violet">
+                                        <span class="swatch-circle" style="--sw: #7c3aed"></span>
+                                        <span class="swatch-name">Violet</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="pink" aria-label="Pink theme" title="Pink">
+                                        <span class="swatch-circle" style="--sw: #db2777"></span>
+                                        <span class="swatch-name">Pink</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="rose" aria-label="Rose theme" title="Rose">
+                                        <span class="swatch-circle" style="--sw: #e11d48"></span>
+                                        <span class="swatch-name">Rose</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="amber" aria-label="Amber theme" title="Amber">
+                                        <span class="swatch-circle" style="--sw: #d97706"></span>
+                                        <span class="swatch-name">Amber</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch" data-palette-choice="slate" aria-label="Slate theme" title="Slate">
+                                        <span class="swatch-circle" style="--sw: #27272a"></span>
+                                        <span class="swatch-name">Slate</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="palette-divider"></div>
+                            <div class="palette-section">
+                                <span class="palette-heading">Color combinations</span>
+                                <div class="combo-palette-grid" role="group" aria-label="Color combinations">
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="ocean" aria-label="Ocean Breeze theme" title="Ocean Breeze">
+                                        <span class="swatch-circle duo" style="--sw: #0369a1; --sw2: #06b6d4"></span>
+                                        <span class="swatch-name">Ocean</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="sunset" aria-label="Sunset Glow theme" title="Sunset Glow">
+                                        <span class="swatch-circle duo" style="--sw: #ea580c; --sw2: #db2777"></span>
+                                        <span class="swatch-name">Sunset</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="forest" aria-label="Forest Sage theme" title="Forest Sage">
+                                        <span class="swatch-circle duo" style="--sw: #15803d; --sw2: #ca8a04"></span>
+                                        <span class="swatch-name">Forest</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="lavender" aria-label="Lavender Dusk theme" title="Lavender Dusk">
+                                        <span class="swatch-circle duo" style="--sw: #6366f1; --sw2: #a855f7"></span>
+                                        <span class="swatch-name">Lavender</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="coffee" aria-label="Warm Mocha theme" title="Warm Mocha">
+                                        <span class="swatch-circle duo" style="--sw: #92400e; --sw2: #d97706"></span>
+                                        <span class="swatch-name">Mocha</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="nord" aria-label="Nordic Frost theme" title="Nordic Frost">
+                                        <span class="swatch-circle duo" style="--sw: #3b82f6; --sw2: #14b8a6"></span>
+                                        <span class="swatch-name">Nordic</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="cherry" aria-label="Sakura Cherry theme" title="Sakura Cherry">
+                                        <span class="swatch-circle duo" style="--sw: #ec4899; --sw2: #e11d48"></span>
+                                        <span class="swatch-name">Sakura</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="mint" aria-label="Matcha Mint theme" title="Matcha Mint">
+                                        <span class="swatch-circle duo" style="--sw: #10b981; --sw2: #84cc16"></span>
+                                        <span class="swatch-name">Matcha</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="cyber" aria-label="Cyber Neon theme" title="Cyber Neon">
+                                        <span class="swatch-circle duo" style="--sw: #06b6d4; --sw2: #d946ef"></span>
+                                        <span class="swatch-name">Cyber</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="royal" aria-label="Royal Gold theme" title="Royal Gold">
+                                        <span class="swatch-circle duo" style="--sw: #1d4ed8; --sw2: #d97706"></span>
+                                        <span class="swatch-name">Royal</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="coral" aria-label="Tropical Coral theme" title="Tropical Coral">
+                                        <span class="swatch-circle duo" style="--sw: #f43f5e; --sw2: #14b8a6"></span>
+                                        <span class="swatch-name">Tropical</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="aurora" aria-label="Aurora theme" title="Aurora">
+                                        <span class="swatch-circle duo" style="--sw: #10b981; --sw2: #8b5cf6"></span>
+                                        <span class="swatch-name">Aurora</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="berry" aria-label="Wild Berry theme" title="Wild Berry">
+                                        <span class="swatch-circle duo" style="--sw: #9333ea; --sw2: #e11d48"></span>
+                                        <span class="swatch-name">Berry</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="citrus" aria-label="Citrus Pop theme" title="Citrus Pop">
+                                        <span class="swatch-circle duo" style="--sw: #f97316; --sw2: #65a30d"></span>
+                                        <span class="swatch-name">Citrus</span>
+                                    </button>
+                                    <button type="button" class="palette-swatch combo-swatch" data-palette-choice="midnight" aria-label="Midnight Ruby theme" title="Midnight Ruby">
+                                        <span class="swatch-circle duo" style="--sw: #dc2626; --sw2: #475569"></span>
+                                        <span class="swatch-name">Ruby</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <button type="button" class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
                         <span></span><span></span><span></span>
                     </button>
@@ -56,9 +207,16 @@
                             <button type="submit">Log out</button>
                         </form>
                     {% else %}
-                        <a href="{% url 'home' %}" class="{% if current == 'home' %}active{% endif %}">Home</a>
-                        <a href="{% url 'login' %}" class="{% if current == 'login' %}active{% endif %}">Log in</a>
-                        <a class="nav-cta" href="{% url 'signup' %}">Sign up</a>
+                        <div class="nav-group-primary">
+                            <a href="{% if current == 'home' %}#top{% else %}{% url 'home' %}{% endif %}" class="{% if current == 'home' %}active{% endif %}" data-nav-section="top">Home</a>
+                            <a href="{% if current == 'home' %}#how-it-works{% else %}{% url 'home' %}#how-it-works{% endif %}" data-nav-section="how-it-works">How it works</a>
+                            <a href="{% if current == 'home' %}#interactive-timeline{% else %}{% url 'home' %}#interactive-timeline{% endif %}" data-nav-section="interactive-timeline">Interactive timeline</a>
+                            <a href="{% if current == 'home' %}#features{% else %}{% url 'home' %}#features{% endif %}" data-nav-section="features">Everything you need</a>
+                        </div>
+                        <div class="nav-group-auth">
+                            <a class="nav-login {% if current == 'login' %}active{% endif %}" href="{% url 'login' %}">Log in</a>
+                            <a class="nav-cta" href="{% url 'signup' %}">Sign up</a>
+                        </div>
                     {% endif %}
                     {% endwith %}
                 </nav>
@@ -104,6 +262,6 @@
             </div>
         </div>
         <main class="page" id="pageContent">{% block content %}{% endblock %}</main>
-        <script src="{% static 'js/app.js' %}?v=12" defer></script>
+        <script src="{% static 'js/app.js' %}?v=34" defer></script>
     </body>
 </html>

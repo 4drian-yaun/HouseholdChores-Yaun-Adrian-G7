@@ -64,7 +64,9 @@ class ChoreDetailView(HouseholdContextMixin, TemplateView):
         chore = get_object_or_404(Chore, pk=self.kwargs["pk"], household=household)
         week = current_week_start()
         assignments = list(
-            chore.assignments.select_related("member").order_by("-week_start_date")
+            chore.assignments.filter(member__is_active=True)
+            .select_related("member")
+            .order_by("-week_start_date")
         )
         current = None
         for assignment in assignments:
@@ -213,7 +215,7 @@ class HistoryView(HouseholdContextMixin, TemplateView):
         raw_member = self.request.GET.get("member", "")
         if raw_member.isdigit():
             parsed_id = int(raw_member)
-            if household.members.filter(pk=parsed_id).exists():
+            if household.members.filter(pk=parsed_id, is_active=True).exists():
                 member_id = parsed_id
 
         prev_week = None
@@ -229,7 +231,7 @@ class HistoryView(HouseholdContextMixin, TemplateView):
         context["selected"] = selected
         context["prev_week"] = prev_week
         context["next_week"] = next_week
-        context["members"] = list(household.members.order_by("-is_active", "display_name"))
+        context["members"] = list(household.members.filter(is_active=True).order_by("display_name"))
         context["selected_member"] = member_id
         if selected:
             context["overview"] = week_overview(
@@ -243,8 +245,30 @@ class AnalyticsView(HouseholdContextMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["stats"] = analytics(self.request.household)
-        context["current_pending"] = week_overview(
-            self.request.household, self.request.membership
-        )["pending"]
+        household = self.request.household
+        membership = self.request.membership
+        this_week = week_overview(household, membership)
+        mine = Assignment.objects.filter(member=membership)
+        my_done = mine.filter(status=Assignment.Status.COMPLETED).count()
+        my_missed = mine.filter(status=Assignment.Status.MISSED).count()
+        my_pending = mine.filter(
+            week_start_date=this_week["week_start"], status=Assignment.Status.PENDING
+        ).count()
+        my_closed = my_done + my_missed
+        member_count = household.members.filter(is_active=True).count()
+        chore_count = household.chores.filter(is_active=True).count()
+
+        context["stats"] = analytics(household)
+        context["this_week"] = this_week
+        context["current_pending"] = this_week["pending"]
+        context["member_count"] = member_count
+        context["chore_count"] = chore_count
+        context["my_stats"] = {
+            "done": my_done,
+            "missed": my_missed,
+            "pending": my_pending,
+            "closed": my_closed,
+            "rate": percent(my_done, my_closed),
+            "rotation_order": membership.rotation_order,
+        }
         return context

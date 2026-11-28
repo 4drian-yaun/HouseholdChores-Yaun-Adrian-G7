@@ -6,6 +6,12 @@
 {% block extrahead %}
 {{ block.super }}
 <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}?v=11">
+<script>
+  (function () {
+    var palette = localStorage.getItem("hc-palette") || "blue";
+    document.documentElement.setAttribute("data-palette", palette);
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,7 +19,7 @@
 
 {% block extrastyle %}
 {{ block.super }}
-<link rel="stylesheet" href="{% static 'css/admin_theme.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'css/admin_theme.css' %}?v=7">
 {% endblock %}
 
 {% block branding %}

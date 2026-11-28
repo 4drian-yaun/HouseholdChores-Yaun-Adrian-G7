@@ -96,7 +96,23 @@ class MemberListView(HouseholdContextMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        active = list(self.request.household.members.filter(is_active=True).select_related("user"))
+        from chores.models import Assignment
+        from chores.services import current_week_start
+
+        household = self.request.household
+        active = list(household.members.filter(is_active=True).select_related("user"))
+        week = current_week_start()
+        by_member = {}
+        for a in (
+            Assignment.objects.filter(
+                chore__household=household, week_start_date=week, member__is_active=True
+            )
+            .select_related("chore")
+            .order_by("chore__name")
+        ):
+            by_member.setdefault(a.member_id, []).append(a)
+        for m in active:
+            m.this_week_assignments = by_member.get(m.id, [])
         context["active_members"] = active
         context["last_order"] = len(active)
         return context
