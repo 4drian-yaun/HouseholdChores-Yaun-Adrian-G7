@@ -199,12 +199,16 @@
     }
   };
 
-  // Helper: interactive stagger dot grid (hero + page headers + auth screens)
-  const initKineticGrid = (gridEl, hostEl, colsDesktop, rowsDesktop, colsMobile, rowsMobile) => {
-    if (!gridEl || !hostEl || prefersReducedMotion) return;
-    const isCompact = window.innerWidth < 640;
-    const cols = isCompact ? colsMobile : colsDesktop;
-    const rows = isCompact ? rowsMobile : rowsDesktop;
+  // Helper: interactive stagger dot grid (desktop mouse-only; disabled on touch/mobile)
+  const canUseKineticGrid = () =>
+    !prefersReducedMotion &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    window.innerWidth > 768;
+
+  const initKineticGrid = (gridEl, hostEl, colsDesktop, rowsDesktop) => {
+    if (!gridEl || !hostEl || !canUseKineticGrid()) return;
+    const cols = colsDesktop;
+    const rows = rowsDesktop;
     gridEl.style.setProperty("--grid-cols", String(cols));
     gridEl.style.setProperty("--grid-rows", String(rows));
 
@@ -232,6 +236,7 @@
 
     let lastRipple = 0;
     hostEl.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
       const now = performance.now();
       if (now - lastRipple < 170) return;
       lastRipple = now;
@@ -542,25 +547,27 @@
     });
   }
 
-  // 3) Interactive stagger dot grid (hero on landing, subtle ambient grid on page-head & auth pages)
-  const heroGrid = document.querySelector("[data-kinetic-grid]");
-  if (heroGrid) {
-    initKineticGrid(heroGrid, heroGrid.closest(".landing-hero"), 11, 6, 6, 5);
-  } else if (!prefersReducedMotion) {
-    const pageHead = document.querySelector(".page-head");
-    const authBox = document.querySelector(".auth.auth-centered");
-    if (pageHead) {
-      const g = document.createElement("div");
-      g.className = "kinetic-grid kinetic-grid-subtle";
-      g.setAttribute("aria-hidden", "true");
-      pageHead.prepend(g);
-      initKineticGrid(g, pageHead, 12, 3, 6, 3);
-    } else if (authBox) {
-      const g = document.createElement("div");
-      g.className = "kinetic-grid kinetic-grid-subtle";
-      g.setAttribute("aria-hidden", "true");
-      authBox.prepend(g);
-      initKineticGrid(g, authBox, 10, 6, 6, 5);
+  // 3) Interactive stagger dot grid (desktop mouse-only; disabled on touch/mobile)
+  if (canUseKineticGrid()) {
+    const heroGrid = document.querySelector("[data-kinetic-grid]");
+    if (heroGrid) {
+      initKineticGrid(heroGrid, heroGrid.closest(".landing-hero"), 11, 6);
+    } else {
+      const pageHead = document.querySelector(".page-head");
+      const authBox = document.querySelector(".auth.auth-centered");
+      if (pageHead) {
+        const g = document.createElement("div");
+        g.className = "kinetic-grid kinetic-grid-subtle";
+        g.setAttribute("aria-hidden", "true");
+        pageHead.prepend(g);
+        initKineticGrid(g, pageHead, 12, 3);
+      } else if (authBox) {
+        const g = document.createElement("div");
+        g.className = "kinetic-grid kinetic-grid-subtle";
+        g.setAttribute("aria-hidden", "true");
+        authBox.prepend(g);
+        initKineticGrid(g, authBox, 10, 6);
+      }
     }
   }
 
