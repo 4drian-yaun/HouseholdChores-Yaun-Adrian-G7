@@ -4,7 +4,7 @@
 <div class="page-head animate-in">
     <div>
         <h1>Members</h1>
-        <p class="muted">Chores rotate in the order shown below, then wrap back to the first person.</p>
+        <p class="muted">Manage household members and set the exact weekly chore rotation order.</p>
     </div>
     <div class="head-actions">
         <a class="btn-sm ghost btn-with-icon" href="{% url 'household_edit' %}">
@@ -20,7 +20,10 @@
 
 {% if active_members %}
 <div class="rotation-chain animate-in" aria-label="Rotation sequence">
-    <span class="chain-label">Weekly rotation</span>
+    <div class="chain-head">
+        <span class="chain-label">Monday rotation sequence</span>
+        <small class="chain-sub">Wraps back to #1 after the last person</small>
+    </div>
     <div class="chain-items">
         {% for m in active_members %}
         <span class="chain-node">
@@ -29,7 +32,7 @@
         {% if not forloop.last %}<span class="chain-arrow" aria-hidden="true">&rarr;</span>{% endif %}
         {% endfor %}
         {% if active_members|length > 1 %}
-        <span class="chain-arrow" aria-hidden="true">&#8635;</span>
+        <span class="chain-arrow chain-loop" aria-hidden="true" title="Wraps back to #1">&#8635;</span>
         {% endif %}
     </div>
 </div>
@@ -39,23 +42,33 @@
     <div class="card-head">
         <div>
             <h2>Active members ({{ active_members|length }})</h2>
-            <p class="card-sub">Use the arrows to adjust weekly rotation order.</p>
+            <p class="card-sub">Use the arrows to adjust rotation order and see each member's tasks this week.</p>
         </div>
-        {% if active_members|length > 2 %}
-        <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="search" placeholder="Search members..." aria-label="Search members" data-table-search=".member-row">
+        {% if active_members|length > 1 %}
+        <div class="toolbar-right">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" placeholder="Search members..." aria-label="Search members" data-table-search=".member-row">
+            </div>
+            <div class="filter-pills" role="group" aria-label="Filter members" data-member-filter>
+                <button type="button" class="pill active" data-filter="all">All</button>
+                <button type="button" class="pill" data-filter="admin">Admins</button>
+                <button type="button" class="pill" data-filter="linked">Linked</button>
+                <button type="button" class="pill" data-filter="unlinked">No login</button>
+            </div>
         </div>
         {% endif %}
     </div>
     <div class="table-wrap">
         <table class="mobile-cards">
             <thead>
-                <tr><th>#</th><th>Name</th><th>Account</th><th>Role</th><th>Order</th><th></th></tr>
+                <tr><th>#</th><th>Member</th><th>This week</th><th>Account</th><th>Role</th><th>Order</th><th></th></tr>
             </thead>
             <tbody>
                 {% for m in active_members %}
-                <tr class="member-row{% if m.pk == request.membership.pk %} is-mine{% endif %}">
+                <tr class="member-row{% if m.pk == request.membership.pk %} is-mine{% endif %}"
+                    data-role="{{ m.role|lower }}"
+                    data-linked="{% if m.user %}true{% else %}false{% endif %}">
                     <td data-label="Position"><span class="order-num">{{ m.rotation_order }}</span></td>
                     <td class="cell-primary" data-label="Member">
                         <div class="member-cell">
@@ -66,15 +79,32 @@
                             </div>
                         </div>
                     </td>
-                    <td data-label="Account">{% if m.user %}<span class="handle-pill">@{{ m.user.username }}</span>{% else %}<span class="sub">No account (cannot log in)</span>{% endif %}</td>
+                    <td data-label="This week">
+                        {% if m.this_week_assignments %}
+                        <div class="member-chore-chips">
+                            {% for a in m.this_week_assignments %}
+                            <a class="mini-chore-chip is-{{ a.status|lower }}" href="{% url 'chore_detail' a.chore.pk %}" title="{{ a.get_status_display }}">{{ a.chore.name }}</a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <span class="sub">No chores</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Account">{% if m.user %}<span class="handle-pill">@{{ m.user.username }}</span>{% else %}<span class="sub">No login</span>{% endif %}</td>
                     <td data-label="Role"><span class="role-chip {{ m.role|lower }}">{{ m.get_role_display }}</span></td>
                     <td class="cell-action" data-label="Order">
-                        {% if not forloop.first %}
-                        <form method="post" action="{% url 'member_move' m.pk 'up' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move up" title="Move up">&uarr;</button></form>
-                        {% endif %}
-                        {% if not forloop.last %}
-                        <form method="post" action="{% url 'member_move' m.pk 'down' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move down" title="Move down">&darr;</button></form>
-                        {% endif %}
+                        <div class="order-stepper">
+                            {% if not forloop.first %}
+                            <form method="post" action="{% url 'member_move' m.pk 'up' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move up" title="Move up">&uarr;</button></form>
+                            {% else %}
+                            <span class="move-placeholder" aria-hidden="true"></span>
+                            {% endif %}
+                            {% if not forloop.last %}
+                            <form method="post" action="{% url 'member_move' m.pk 'down' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move down" title="Move down">&darr;</button></form>
+                            {% else %}
+                            <span class="move-placeholder" aria-hidden="true"></span>
+                            {% endif %}
+                        </div>
                     </td>
                     <td class="cell-action cell-actions-row">
                         <a class="btn-sm ghost btn-with-icon" href="{% url 'member_edit' m.pk %}">
@@ -93,6 +123,6 @@
             </tbody>
         </table>
     </div>
-    <p class="empty filter-empty" hidden>No members match your search.</p>
+    <p class="empty filter-empty" hidden>No members match this filter.</p>
 </section>
 {% endblock %}

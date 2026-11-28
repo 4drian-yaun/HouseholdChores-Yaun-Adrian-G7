@@ -4,15 +4,109 @@
 <div class="page-head animate-in">
     <div>
         <h1>Analytics</h1>
-        <p class="muted">Based on completed and missed assignments. {% if current_pending %}{{ current_pending }} chore(s) still pending this week are excluded.{% else %}Pending chores this week are excluded.{% endif %}</p>
+        <p class="muted">All household progress, personal performance, fairness, and weekly trends in one place.</p>
     </div>
-    {% if stats.has_data %}
     <div class="head-actions">
+        {% if stats.has_data %}
         <span class="health-pill tone-{{ stats.health_tone }}">{{ stats.health_label }} &middot; {{ stats.done_pct }}%</span>
+        {% endif %}
         <a class="btn-sm ghost" href="{% url 'history' %}">View history</a>
     </div>
-    {% endif %}
 </div>
+
+<section class="card analytics-summary-card animate-in">
+    <div class="summary-grid">
+        <div class="summary-block">
+            <div class="summary-block-head">
+                <span class="summary-eyebrow">This week</span>
+                <span class="pct-pill {% if this_week.percent >= 80 %}ok{% elif this_week.percent >= 50 %}sun{% else %}warn{% endif %}">{{ this_week.percent }}%</span>
+            </div>
+            <div class="summary-metrics">
+                <div>
+                    <strong data-count="{{ this_week.done }}">{{ this_week.done }}</strong><span class="summary-denom">/{{ this_week.total }}</span>
+                    <small>Done this week</small>
+                </div>
+                <div>
+                    <strong data-count="{{ my_stats.pending }}">{{ my_stats.pending }}</strong>
+                    <small>Your pending</small>
+                </div>
+                <div>
+                    <strong data-count="{{ this_week.days_left }}">{{ this_week.days_left }}</strong>
+                    <small>Days left</small>
+                </div>
+            </div>
+            <div class="progress summary-progress" aria-hidden="true">
+                <span class="progress-fill" style="width: {{ this_week.percent }}%"></span>
+            </div>
+        </div>
+
+        <div class="summary-block">
+            <div class="summary-block-head">
+                <span class="summary-eyebrow">Your stats</span>
+                <span class="pct-pill {% if not my_stats.closed %}sun{% elif my_stats.rate >= 80 %}ok{% elif my_stats.rate >= 50 %}sun{% else %}warn{% endif %}">
+                    {% if my_stats.closed %}{{ my_stats.rate }}% reliability{% else %}New{% endif %}
+                </span>
+            </div>
+            <div class="summary-metrics">
+                <div>
+                    <strong data-count="{{ my_stats.done }}">{{ my_stats.done }}</strong>
+                    <small>Completed</small>
+                </div>
+                <div>
+                    <strong data-count="{{ my_stats.missed }}">{{ my_stats.missed }}</strong>
+                    <small>Missed</small>
+                </div>
+                <div>
+                    <strong>#{{ my_stats.rotation_order }}</strong><span class="summary-denom">/{{ member_count }}</span>
+                    <small>Rotation slot</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-block">
+            <div class="summary-block-head">
+                <span class="summary-eyebrow">Household totals</span>
+                {% if stats.trend_delta is not None %}
+                <span class="pct-pill {% if stats.trend_delta > 0 %}ok{% elif stats.trend_delta < 0 %}warn{% else %}sun{% endif %}">
+                    {% if stats.trend_delta > 0 %}&#8599; +{{ stats.trend_delta }}%{% elif stats.trend_delta < 0 %}&#8600; {{ stats.trend_delta }}%{% else %}&rarr; 0%{% endif %} vs last wk
+                </span>
+                {% else %}
+                <span class="pct-pill ok">{{ member_count }} members &middot; {{ chore_count }} chores</span>
+                {% endif %}
+            </div>
+            <div class="summary-metrics">
+                <div>
+                    <strong data-count="{{ stats.total }}">{{ stats.total }}</strong>
+                    <small>Closed ({{ stats.avg_per_week }}/wk)</small>
+                </div>
+                <div>
+                    <strong data-count="{{ stats.perfect_weeks }}">{{ stats.perfect_weeks }}</strong><span class="summary-denom">/{{ stats.week_count }}</span>
+                    <small>Perfect weeks</small>
+                </div>
+                <div>
+                    <strong>{% if stats.peak_day %}{{ stats.peak_day|slice:":3" }}{% else %}&ndash;{% endif %}</strong>
+                    <small>Peak day</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if stats.has_data %}
+    <div class="summary-footer">
+        <span><strong>Top contributor{% if stats.top_members|length > 1 %}s{% endif %}:</strong> {% if stats.top_members %}{{ stats.top_members|join:", " }}{% else %}&ndash;{% endif %}</span>
+        <span class="summary-dot" aria-hidden="true">&middot;</span>
+        <span><strong>Active household:</strong> {{ member_count }} member{% if member_count != 1 %}s{% endif %}, {{ chore_count }} chore{% if chore_count != 1 %}s{% endif %}</span>
+        <span class="summary-dot" aria-hidden="true">&middot;</span>
+        <span>
+            {% if current_pending %}
+                <a href="{% url 'dashboard' %}">{{ current_pending }} pending chore{% if current_pending != 1 %}s{% endif %} this week &rarr;</a>
+            {% else %}
+                All chores caught up this week &#10003;
+            {% endif %}
+        </span>
+    </div>
+    {% endif %}
+</section>
 
 {% if not stats.has_data %}
 <section class="card analytics-empty animate-in">
@@ -20,225 +114,74 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
     </div>
     <h2>No analytics yet</h2>
-    <p class="muted">Analytics appear once at least one chore is completed or the first week closes.</p>
+    <p class="muted">Charts and trends appear once at least one chore is completed or the first week closes.</p>
     <a class="btn-link btn-inline" href="{% url 'dashboard' %}">Go to this week's chores</a>
 </section>
 {% else %}
 
-<div class="insight-strip animate-in">
-    <div class="insight-item">
-        <span class="insight-label">Top contributor{% if stats.top_members|length > 1 %}s{% endif %}</span>
-        <strong>{% if stats.top_members %}{{ stats.top_members|join:", " }}{% else %}&ndash;{% endif %}</strong>
-    </div>
-    <div class="insight-divider" aria-hidden="true"></div>
-    <div class="insight-item">
-        <span class="insight-label">Weeks recorded</span>
-        <strong>{{ stats.week_count }} week{% if stats.week_count != 1 %}s{% endif %}</strong>
-    </div>
-    <div class="insight-divider" aria-hidden="true"></div>
-    <div class="insight-item">
-        <span class="insight-label">This week pending</span>
-        <strong>
-            {% if current_pending %}
-                <a href="{% url 'dashboard' %}">{{ current_pending }} remaining &rarr;</a>
-            {% else %}
-                All caught up &#10003;
-            {% endif %}
-        </strong>
-    </div>
-</div>
-
-<div class="stats stats-4 stagger">
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Closed assignments</span>
-            <span class="kpi-icon kpi-teal" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
-            </span>
-        </div>
-        <div class="kpi-row">
-            <strong class="kpi-value" data-count="{{ stats.total }}">{{ stats.total }}</strong>
-            <span class="pct-pill ok">{{ stats.week_count }} wk{% if stats.week_count != 1 %}s{% endif %}</span>
-        </div>
-    </div>
-
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Completed</span>
-            <span class="kpi-icon kpi-ok" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </span>
-        </div>
-        <div class="kpi-row">
-            <strong class="kpi-value" data-count="{{ stats.done }}">{{ stats.done }}</strong>
-            <span class="pct-pill ok">{{ stats.done_pct }}%</span>
-        </div>
-    </div>
-
-    <div class="stat kpi-card stat-warn animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Missed</span>
-            <span class="kpi-icon kpi-warn" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            </span>
-        </div>
-        <div class="kpi-row">
-            <strong class="kpi-value" data-count="{{ stats.missed }}">{{ stats.missed }}</strong>
-            <span class="pct-pill {% if stats.missed == 0 %}ok{% else %}warn{% endif %}">{% if stats.missed == 0 %}Perfect{% else %}{{ stats.missed_pct }}%{% endif %}</span>
-        </div>
-    </div>
-
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Completion rate</span>
-            <span class="kpi-icon kpi-sun" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            </span>
-        </div>
-        <div class="kpi-row">
-            <strong class="kpi-value"><b data-count="{{ stats.done_pct }}">{{ stats.done_pct }}</b>%</strong>
-            <span class="pct-pill {% if stats.health_tone == 'ok' %}ok{% elif stats.health_tone == 'sun' %}sun{% else %}warn{% endif %}">{{ stats.health_label }}</span>
-        </div>
-    </div>
-</div>
-
 <div class="grid-2 stagger">
-    <section class="card analytics-card animate-in">
-        <div class="card-head">
-            <div>
-                <h2>Completed vs. missed</h2>
-                <p class="card-sub">Overall household completion ratio</p>
-            </div>
-        </div>
-        <div class="donut-layout" data-donut-group>
-            <div class="donut-box" role="img" aria-label="{{ stats.done_pct }} percent completed, {{ stats.missed_pct }} percent missed">
-                <svg class="donut-svg" viewBox="0 0 160 160">
-                    <circle class="donut-track" cx="80" cy="80" r="66"></circle>
-                    {% if stats.missed > 0 %}
-                    <circle class="donut-seg seg-missed" data-seg="missed" cx="80" cy="80" r="66"
-                        stroke-dasharray="{{ stats.donut_circ }}"
-                        stroke-dashoffset="0"></circle>
-                    {% endif %}
-                    <circle class="donut-seg seg-done" data-seg="done" cx="80" cy="80" r="66"
-                        stroke-dasharray="{{ stats.donut_circ }}"
-                        stroke-dashoffset="{{ stats.donut_done_offset }}"
-                        style="--circ: {{ stats.donut_circ }}; --target-offset: {{ stats.donut_done_offset }};"></circle>
-                </svg>
-                <div class="donut-center">
-                    <strong><b data-count="{{ stats.done_pct }}">{{ stats.done_pct }}</b>%</strong>
-                    <small>Completed</small>
-                </div>
-            </div>
-
-            <div class="donut-legend">
-                <div class="legend-card" data-legend="done">
-                    <div class="legend-left">
-                        <span class="dot done"></span>
-                        <div>
-                            <strong>Completed</strong>
-                            <small>Finished on time</small>
-                        </div>
-                    </div>
-                    <div class="legend-right">
-                        <strong>{{ stats.done }}</strong>
-                        <span class="pct-pill ok">{{ stats.done_pct }}%</span>
-                    </div>
-                </div>
-                <div class="legend-card" data-legend="missed">
-                    <div class="legend-left">
-                        <span class="dot missed"></span>
-                        <div>
-                            <strong>Missed</strong>
-                            <small>Unfinished at week end</small>
-                        </div>
-                    </div>
-                    <div class="legend-right">
-                        <strong>{{ stats.missed }}</strong>
-                        <span class="pct-pill warn">{{ stats.missed_pct }}%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="ratio-bar" aria-hidden="true">
-            <span class="ratio-done" style="width: {{ stats.done_pct }}%"></span>
-            <span class="ratio-missed" style="width: {{ stats.missed_pct }}%"></span>
-        </div>
-    </section>
-
-    <section class="card analytics-card animate-in">
-        <div class="card-head">
-            <div>
-                <h2>Completed tasks per member</h2>
-                <p class="card-sub">Fairness &amp; individual completion rates</p>
-            </div>
-            {% if stats.members|length > 1 %}
-            <div class="filter-pills" role="group" aria-label="Sort members" data-member-sort>
-                <button type="button" class="pill active" data-sort="done">Most done</button>
-                <button type="button" class="pill" data-sort="rate">Best rate</button>
-            </div>
-            {% endif %}
-        </div>
-        <ul class="bars member-bars" data-member-list>
-            {% for m in stats.members %}
-            <li class="member-bar-item" data-done="{{ m.done }}" data-rate="{{ m.rate }}" data-width-done="{{ m.width }}" data-width-rate="{{ m.rate }}">
-                <div class="bar-label">
-                    <div class="member-bar-who">
-                        <span class="rank-badge rank-{{ forloop.counter }}">#{{ forloop.counter }}</span>
-                        <span class="avatar avatar-sm avatar-c{{ m.member_id|divisibleby:4|yesno:'3,0' }}{% if m.member_id|divisibleby:3 %} avatar-c2{% elif m.member_id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ m.member__display_name|slice:":1"|upper }}</span>
-                        <span class="member-bar-name">{{ m.member__display_name }}{% if not m.member__is_active %} <span class="tag">removed</span>{% endif %}</span>
-                    </div>
-                    <div class="bar-metrics">
-                        <strong>{{ m.done }} done</strong>
-                        <span class="pct-pill {% if m.rate >= 80 %}ok{% elif m.rate >= 50 %}sun{% else %}warn{% endif %}">{{ m.rate }}%</span>
-                    </div>
-                </div>
-                <div class="track"><span class="bar-fill{% if m.done == 0 %} is-zero{% endif %}" style="--w: {{ m.width }}%; width: {{ m.width }}%"></span></div>
-            </li>
-            {% endfor %}
-        </ul>
-    </section>
-</div>
-
-<div class="grid-2 stagger">
-    <section class="card analytics-card animate-in">
-        <div class="card-head">
-            <div>
-                <h2>Most missed chores</h2>
-                <p class="card-sub">Tasks that most often go unfinished</p>
-            </div>
-        </div>
-        {% if stats.chores %}
-        <ul class="bars warn">
-            {% for c in stats.chores %}
-            <li>
-                <div class="bar-label">
-                    <span>{{ c.chore__name }}{% if not c.chore__is_active %} <span class="tag">retired</span>{% endif %}</span>
-                    <div class="bar-metrics">
-                        <strong>{{ c.missed }} of {{ c.total }} missed</strong>
-                        <span class="pct-pill warn">{{ c.rate }}%</span>
-                    </div>
-                </div>
-                <div class="track"><span class="bar-fill" style="--w: {{ c.width }}%; width: {{ c.width }}%"></span></div>
-            </li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <div class="zero-missed">
-            <div class="zero-missed-icon" aria-hidden="true">&#10003;</div>
-            <h3>Nothing has been missed!</h3>
-            <p>Every closed chore so far has been completed on time. Nice work.</p>
-        </div>
-        {% endif %}
-    </section>
-
     <section class="card analytics-card animate-in">
         <div class="card-head">
             <div>
                 <h2>Weekly completion trend</h2>
-                <p class="card-sub">Last {{ stats.weeks|length }} active week{% if stats.weeks|length != 1 %}s{% endif %}</p>
+                <p class="card-sub">Last {{ stats.weeks|length }} active week{% if stats.weeks|length != 1 %}s{% endif %} &middot; Hover any point for details</p>
+            </div>
+            <div class="filter-pills" role="group" aria-label="Trend chart style" data-trend-mode>
+                <button type="button" class="pill active" data-mode="area">Area</button>
+                <button type="button" class="pill" data-mode="bars">Bars</button>
             </div>
         </div>
-        <div class="trend-wrap">
+
+        <div class="trend-area-wrap" data-trend-panel="area">
+            <div class="trend-svg-stage" data-area-chart>
+                <svg class="trend-svg" viewBox="0 0 520 170" preserveAspectRatio="none" role="img" aria-label="Weekly completion trend area chart">
+                    <defs>
+                        <linearGradient id="hcTrendFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="var(--teal)" stop-opacity="0.32"/>
+                            <stop offset="100%" stop-color="var(--teal)" stop-opacity="0.01"/>
+                        </linearGradient>
+                        <linearGradient id="hcTrendStroke" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="var(--teal)"/>
+                            <stop offset="100%" stop-color="var(--teal-2)"/>
+                        </linearGradient>
+                    </defs>
+                    <g class="trend-svg-grid">
+                        <line x1="34" y1="18" x2="500" y2="18"/>
+                        <line x1="34" y1="81" x2="500" y2="81"/>
+                        <line x1="34" y1="144" x2="500" y2="144"/>
+                    </g>
+                    <g class="trend-svg-axis">
+                        <text x="26" y="22" text-anchor="end">100%</text>
+                        <text x="26" y="85" text-anchor="end">50%</text>
+                        <text x="26" y="148" text-anchor="end">0%</text>
+                    </g>
+                    <line class="trend-crosshair" x1="0" y1="18" x2="0" y2="144" data-area-crosshair/>
+                    {% if stats.trend_area_path %}
+                    <path class="trend-area-path" d="{{ stats.trend_area_path }}" fill="url(#hcTrendFill)"/>
+                    <path class="trend-line-path" d="{{ stats.trend_line_path }}" stroke="url(#hcTrendStroke)"/>
+                    {% endif %}
+                    {% for w in stats.weeks %}
+                    <g class="trend-node" tabindex="0"
+                       data-area-node
+                       data-x="{{ w.svg_x }}"
+                       data-y="{{ w.svg_y }}"
+                       data-label="{{ w.week_start_date|date:'M d, Y' }}"
+                       data-detail="{{ w.done }} done &middot; {{ w.missed }} missed ({{ w.rate }}%)"
+                       data-rate="{{ w.rate }}%">
+                        <circle class="trend-node-halo" cx="{{ w.svg_x }}" cy="{{ w.svg_y }}" r="11"/>
+                        <circle class="trend-node-dot" cx="{{ w.svg_x }}" cy="{{ w.svg_y }}" r="5"/>
+                        <text class="trend-node-date" x="{{ w.svg_x }}" y="164" text-anchor="middle">{{ w.week_start_date|date:"M d" }}</text>
+                    </g>
+                    {% endfor %}
+                </svg>
+                <div class="area-tooltip" data-area-tooltip hidden>
+                    <strong data-at-title></strong>
+                    <span data-at-detail></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="trend-wrap" data-trend-panel="bars" hidden>
             <div class="trend-grid" aria-hidden="true">
                 <span>100%</span>
                 <span>50%</span>
@@ -261,6 +204,210 @@
             </div>
         </div>
     </section>
+
+    <section class="card analytics-card animate-in">
+        <div class="card-head">
+            <div>
+                <h2>Completed vs. missed</h2>
+                <p class="card-sub">Hover segments to inspect household breakdown</p>
+            </div>
+        </div>
+        <div class="donut-layout" data-donut-group
+             data-default-pct="{{ stats.done_pct }}%"
+             data-default-label="Completed"
+             data-done-pct="{{ stats.done_pct }}%"
+             data-done-label="Completed ({{ stats.done }})"
+             data-missed-pct="{{ stats.missed_pct }}%"
+             data-missed-label="Missed ({{ stats.missed }})">
+            <div class="donut-box" role="img" aria-label="{{ stats.done_pct }} percent completed, {{ stats.missed_pct }} percent missed">
+                <svg class="donut-svg" viewBox="0 0 160 160">
+                    <defs>
+                        <linearGradient id="hcDonutGrad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="var(--teal)"/>
+                            <stop offset="100%" stop-color="var(--teal-2)"/>
+                        </linearGradient>
+                    </defs>
+                    <circle class="donut-track" cx="80" cy="80" r="66"></circle>
+                    {% if stats.missed > 0 %}
+                    <circle class="donut-seg seg-missed" data-seg="missed" cx="80" cy="80" r="66"
+                        stroke-dasharray="{{ stats.donut_circ }}"
+                        stroke-dashoffset="0"></circle>
+                    {% endif %}
+                    <circle class="donut-seg seg-done" data-seg="done" cx="80" cy="80" r="66"
+                        stroke="url(#hcDonutGrad)"
+                        stroke-dasharray="{{ stats.donut_circ }}"
+                        stroke-dashoffset="{{ stats.donut_done_offset }}"
+                        style="--circ: {{ stats.donut_circ }}; --target-offset: {{ stats.donut_done_offset }};"></circle>
+                </svg>
+                <div class="donut-center">
+                    <strong data-donut-pct><b data-count="{{ stats.done_pct }}">{{ stats.done_pct }}</b>%</strong>
+                    <small data-donut-label>Completed</small>
+                </div>
+            </div>
+
+            <div class="donut-legend">
+                <div class="legend-card" data-legend="done" tabindex="0">
+                    <div class="legend-left">
+                        <span class="dot done"></span>
+                        <div>
+                            <strong>Completed</strong>
+                            <small>Finished on time</small>
+                        </div>
+                    </div>
+                    <div class="legend-right">
+                        <strong>{{ stats.done }}</strong>
+                        <span class="pct-pill ok">{{ stats.done_pct }}%</span>
+                    </div>
+                </div>
+                <div class="legend-card" data-legend="missed" tabindex="0">
+                    <div class="legend-left">
+                        <span class="dot missed"></span>
+                        <div>
+                            <strong>Missed</strong>
+                            <small>Unfinished at week end</small>
+                        </div>
+                    </div>
+                    <div class="legend-right">
+                        <strong>{{ stats.missed }}</strong>
+                        <span class="pct-pill warn">{{ stats.missed_pct }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ratio-bar" aria-hidden="true">
+            <span class="ratio-done" style="width: {{ stats.done_pct }}%"></span>
+            <span class="ratio-missed" style="width: {{ stats.missed_pct }}%"></span>
+        </div>
+    </section>
 </div>
+
+<div class="grid-2 stagger">
+    <section class="card analytics-card animate-in">
+        <div class="card-head">
+            <div>
+                <h2>Completed tasks per member</h2>
+                <p class="card-sub">Fairness, completion rate &amp; household share</p>
+            </div>
+            {% if stats.members|length > 1 %}
+            <div class="filter-pills" role="group" aria-label="Sort members" data-member-sort>
+                <button type="button" class="pill active" data-sort="done">Most done</button>
+                <button type="button" class="pill" data-sort="rate">Best rate</button>
+            </div>
+            {% endif %}
+        </div>
+        <ul class="bars member-bars" data-member-list>
+            {% for m in stats.members %}
+            <li class="member-bar-item" data-done="{{ m.done }}" data-rate="{{ m.rate }}" data-width-done="{{ m.width }}" data-width-rate="{{ m.rate }}">
+                <div class="bar-label">
+                    <div class="member-bar-who">
+                        <span class="rank-badge rank-{{ forloop.counter }}">#{{ forloop.counter }}</span>
+                        <span class="avatar avatar-sm avatar-c{{ m.member_id|divisibleby:4|yesno:'3,0' }}{% if m.member_id|divisibleby:3 %} avatar-c2{% elif m.member_id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ m.member__display_name|slice:":1"|upper }}</span>
+                        <a class="member-bar-name member-drill-link" href="{% url 'history' %}?member={{ m.member_id }}" title="Filter history by {{ m.member__display_name }}">
+                            {{ m.member__display_name }}
+                        </a>
+                    </div>
+                    <div class="bar-metrics">
+                        <span class="share-chip">{{ m.share }}% share</span>
+                        <strong>{{ m.done }}/{{ m.total }}</strong>
+                        <span class="pct-pill {% if m.rate >= 80 %}ok{% elif m.rate >= 50 %}sun{% else %}warn{% endif %}">{{ m.rate }}%</span>
+                    </div>
+                </div>
+                <div class="track track-split">
+                    <span class="bar-fill{% if m.done == 0 %} is-zero{% endif %}" style="--w: {{ m.width }}%; width: {{ m.width }}%"></span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="card analytics-card animate-in">
+        <div class="card-head">
+            <div>
+                <h2>Completion rhythm</h2>
+                <p class="card-sub">Which days of the week chores get finished</p>
+            </div>
+            {% if stats.peak_day %}
+            <span class="pct-pill ok">Peak: {{ stats.peak_day }}</span>
+            {% endif %}
+        </div>
+        {% if stats.has_timestamps %}
+        <div class="rhythm-chart" role="img" aria-label="Chores completed by day of week">
+            {% for d in stats.weekdays %}
+            <div class="rhythm-col{% if d.is_peak %} is-peak{% endif %}">
+                <span class="rhythm-count">{{ d.count }}</span>
+                <div class="rhythm-track">
+                    <span class="rhythm-fill" style="height: {{ d.height }}%"></span>
+                </div>
+                <span class="rhythm-day">{{ d.short }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-box rhythm-empty">
+            <h3>No completion timestamps yet</h3>
+            <p class="muted">As members mark chores done, your household's weekly rhythm appears here.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<section class="card analytics-card animate-in">
+    <div class="card-head">
+        <div>
+            <h2>Most missed chores</h2>
+            <p class="card-sub">Click any chore to view its full weekly rotation history</p>
+        </div>
+        <div class="filter-pills" role="group" aria-label="Chore reliability view" data-chore-view>
+            <button type="button" class="pill active" data-view="missed">Most missed ({{ stats.chores|length }})</button>
+            <button type="button" class="pill" data-view="all">All chores ({{ stats.all_chores|length }})</button>
+        </div>
+    </div>
+
+    <div data-chore-panel="missed">
+        {% if stats.chores %}
+        <ul class="bars warn chore-reliability-grid">
+            {% for c in stats.chores %}
+            <li>
+                <div class="bar-label">
+                    <a class="chore-drill-link" href="{% url 'chore_detail' c.chore_id %}">
+                        {{ c.chore__name }}{% if not c.chore__is_active %} <span class="tag">retired</span>{% endif %}
+                    </a>
+                    <div class="bar-metrics">
+                        <strong>{{ c.missed }} of {{ c.total }} missed</strong>
+                        <span class="pct-pill warn">{{ c.rate }}%</span>
+                    </div>
+                </div>
+                <div class="track"><span class="bar-fill" style="--w: {{ c.width }}%; width: {{ c.width }}%"></span></div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="zero-missed">
+            <div class="zero-missed-icon" aria-hidden="true">&#10003;</div>
+            <h3>Nothing has been missed!</h3>
+            <p>Every closed chore so far has been completed on time. Switch to <strong>All chores</strong> to view full reliability stats.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div data-chore-panel="all" hidden>
+        <ul class="bars chore-reliability-grid">
+            {% for c in stats.all_chores %}
+            <li>
+                <div class="bar-label">
+                    <a class="chore-drill-link" href="{% url 'chore_detail' c.chore_id %}">
+                        {{ c.chore__name }}{% if not c.chore__is_active %} <span class="tag">retired</span>{% endif %}
+                    </a>
+                    <div class="bar-metrics">
+                        <strong>{{ c.done }}/{{ c.total }} done</strong>
+                        <span class="pct-pill {% if c.done_rate >= 80 %}ok{% elif c.done_rate >= 50 %}sun{% else %}warn{% endif %}">{{ c.done_rate }}%</span>
+                    </div>
+                </div>
+                <div class="track"><span class="bar-fill{% if c.done_rate == 0 %} is-zero{% endif %}" style="--w: {{ c.done_rate }}%; width: {{ c.done_rate }}%"></span></div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>
 {% endif %}
 {% endblock %}

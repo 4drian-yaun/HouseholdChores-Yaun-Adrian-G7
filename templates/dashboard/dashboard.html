@@ -58,7 +58,7 @@
     <div>
         <h1>{{ household.name }}</h1>
         <p class="muted">
-            <span class="badge">{{ membership.get_role_display }}</span>
+            <span class="role-chip {{ membership.role|lower }}">{{ membership.get_role_display }}</span>
             Week of {{ overview.week_start|date:"M d" }} &ndash; {{ overview.week_end|date:"M d, Y" }}
             <span class="pill-countdown">{% if overview.days_left == 0 %}Due tonight{% elif overview.days_left == 1 %}1 day left{% else %}{{ overview.days_left }} days left{% endif %}</span>
         </p>
@@ -77,89 +77,73 @@
     {% endif %}
 </div>
 
-<div class="stats stagger">
-    {% if is_admin %}
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Active members</span>
-            <span class="kpi-icon kpi-teal" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            </span>
-        </div>
-        <div class="kpi-row">
-            <strong class="kpi-value" data-count="{{ member_count }}">{{ member_count }}</strong>
-            <span class="pct-pill ok">Rotating</span>
-        </div>
-    </div>
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Active chores</span>
-            <span class="kpi-icon kpi-sun" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            </span>
-        </div>
-        <div class="kpi-row">
-            <strong class="kpi-value" data-count="{{ chore_count }}">{{ chore_count }}</strong>
-            <span class="pct-pill sun">Mon &ndash; Sun</span>
-        </div>
-    </div>
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Done this week</span>
-            <span class="kpi-icon kpi-ok" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </span>
-        </div>
-        <div class="kpi-row">
-            <strong class="kpi-value"><b data-count="{{ overview.done }}">{{ overview.done }}</b>/{{ overview.total }}</strong>
-            <span class="pct-pill {% if overview.percent >= 80 %}ok{% elif overview.percent >= 50 %}sun{% else %}warn{% endif %}">{{ overview.percent }}%</span>
-        </div>
-    </div>
-    {% else %}
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Your pending chores</span>
-            <span class="kpi-icon kpi-sun" aria-hidden="true">
+{% if overview.assignments %}
+<section class="card focus-banner animate-in{% if not my_pending %} is-clear{% endif %}">
+    {% if my_pending %}
+    <div class="focus-banner-head">
+        <div class="focus-banner-title">
+            <span class="focus-emblem" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </span>
+            <div>
+                <h2>Up next for you</h2>
+                <p class="card-sub">You have {{ my_pending_count }} pending chore{% if my_pending_count != 1 %}s{% endif %} due by Sunday midnight.</p>
+            </div>
         </div>
-        <div class="kpi-row">
-            <strong class="kpi-value" data-count="{{ my_pending_count }}">{{ my_pending_count }}</strong>
-            <span class="pct-pill {% if my_pending_count == 0 %}ok{% else %}sun{% endif %}">{% if my_pending_count == 0 %}Caught up{% else %}Due Sun{% endif %}</span>
+        {% if my_next_chores %}
+        <div class="next-week-chip">
+            <span>Next Mon:</span>
+            <strong>{% for c in my_next_chores %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>
         </div>
+        {% endif %}
     </div>
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Household progress</span>
-            <span class="kpi-icon kpi-teal" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    <ul class="focus-task-list">
+        {% for a in my_pending %}
+        <li class="focus-task-item">
+            <div class="focus-task-info">
+                <a href="{% url 'chore_detail' a.chore.pk %}"><strong>{{ a.chore.name }}</strong></a>
+                {% if a.chore.description %}<small>{{ a.chore.description }}</small>{% endif %}
+            </div>
+            <form method="post" action="{% url 'assignment_complete' a.pk %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="btn-sm btn-done">Mark done &#10003;</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <div class="focus-clear-row">
+        <div class="focus-banner-title">
+            <span class="focus-emblem is-ok" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </span>
+            <div>
+                <h2>You're all caught up!</h2>
+                <p class="card-sub">
+                    {% if my_done_count %}You completed all {{ my_done_count }} of your chore{% if my_done_count != 1 %}s{% endif %} this week.{% else %}No chores are assigned to you this week.{% endif %}
+                </p>
+            </div>
         </div>
-        <div class="kpi-row">
-            <strong class="kpi-value"><b data-count="{{ overview.percent }}">{{ overview.percent }}</b>%</strong>
-            <span class="pct-pill {% if overview.percent >= 80 %}ok{% elif overview.percent >= 50 %}sun{% else %}warn{% endif %}">This week</span>
+        {% if my_next_chores %}
+        <div class="next-week-chip">
+            <span>Next Mon:</span>
+            <strong>{% for c in my_next_chores %}{{ c.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>
         </div>
-    </div>
-    <div class="stat kpi-card animate-in">
-        <div class="kpi-top">
-            <span class="stat-label">Done this week</span>
-            <span class="kpi-icon kpi-ok" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </span>
-        </div>
-        <div class="kpi-row">
-            <strong class="kpi-value"><b data-count="{{ overview.done }}">{{ overview.done }}</b>/{{ overview.total }}</strong>
-            <span class="pct-pill ok">{{ overview.pending }} left</span>
-        </div>
+        {% endif %}
     </div>
     {% endif %}
-</div>
+</section>
+{% endif %}
 
 <section class="card animate-in">
     <div class="card-head">
         <div>
             <h2>This week's chores</h2>
-            <p class="card-sub">Mark your assigned tasks complete before Sunday midnight.</p>
+            <div class="week-rhythm-strip" aria-label="Current week days">
+                {% for d in week_days %}
+                <span class="week-day-pill{% if d.is_today %} is-today{% elif d.is_past %} is-past{% endif %}">{{ d.label }}</span>
+                {% endfor %}
+            </div>
         </div>
         {% if overview.assignments %}
         <div class="toolbar-right">
@@ -178,15 +162,6 @@
     </div>
     {% include "partials/week_table.html" %}
     <p class="empty filter-empty" hidden>No chores match this filter.</p>
-    <div class="quick-links">
-        {% if is_admin %}
-        <a class="btn-link secondary" href="{% url 'member_list' %}">Manage members</a>
-        <a class="btn-link secondary" href="{% url 'chore_list' %}">Manage chores</a>
-        {% endif %}
-        <a class="btn-link secondary" href="{% url 'history' %}">History</a>
-        <a class="btn-link secondary" href="{% url 'analytics' %}">Analytics</a>
-        <a class="btn-link secondary" href="{% url 'profile' %}">My profile</a>
-    </div>
 </section>
 {% endif %}
 {% endblock %}
