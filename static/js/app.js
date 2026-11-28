@@ -46,15 +46,43 @@
     onScroll();
   }
 
-  // 2. Mobile navigation toggle
+  // 2. Mobile navigation toggle (with tap-outside, Escape, and resize close)
   const navToggle = document.getElementById("navToggle");
   const mainNav = document.getElementById("mainNav");
   if (navToggle && mainNav) {
-    navToggle.addEventListener("click", () => {
+    const setNavOpen = (open) => {
+      navToggle.setAttribute("aria-expanded", String(open));
+      navToggle.classList.toggle("open", open);
+      mainNav.classList.toggle("open", open);
+    };
+
+    navToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
       const expanded = navToggle.getAttribute("aria-expanded") === "true";
-      navToggle.setAttribute("aria-expanded", String(!expanded));
-      navToggle.classList.toggle("open", !expanded);
-      mainNav.classList.toggle("open", !expanded);
+      setNavOpen(!expanded);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (mainNav.classList.contains("open") && topbar && !topbar.contains(e.target)) {
+        setNavOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && mainNav.classList.contains("open")) {
+        setNavOpen(false);
+        navToggle.focus();
+      }
+    });
+
+    mainNav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => setNavOpen(false));
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 860 && mainNav.classList.contains("open")) {
+        setNavOpen(false);
+      }
     });
   }
 

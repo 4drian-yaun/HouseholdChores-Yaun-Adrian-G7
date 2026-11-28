@@ -49,15 +49,15 @@
         {% endif %}
     </div>
     <div class="table-wrap">
-        <table>
+        <table class="mobile-cards">
             <thead>
                 <tr><th>#</th><th>Name</th><th>Account</th><th>Role</th><th>Order</th><th></th></tr>
             </thead>
             <tbody>
                 {% for m in active_members %}
                 <tr class="member-row{% if m.pk == request.membership.pk %} is-mine{% endif %}">
-                    <td><span class="order-num">{{ m.rotation_order }}</span></td>
-                    <td>
+                    <td data-label="Position"><span class="order-num">{{ m.rotation_order }}</span></td>
+                    <td class="cell-primary" data-label="Member">
                         <div class="member-cell">
                             <span class="avatar avatar-c{{ m.id|divisibleby:4|yesno:'3,0' }}{% if m.id|divisibleby:3 %} avatar-c2{% elif m.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ m.display_name|slice:":1"|upper }}</span>
                             <div>
@@ -66,9 +66,9 @@
                             </div>
                         </div>
                     </td>
-                    <td>{% if m.user %}<span class="handle-pill">@{{ m.user.username }}</span>{% else %}<span class="sub">No account (cannot log in)</span>{% endif %}</td>
-                    <td><span class="role-chip {{ m.role|lower }}">{{ m.get_role_display }}</span></td>
-                    <td class="cell-action">
+                    <td data-label="Account">{% if m.user %}<span class="handle-pill">@{{ m.user.username }}</span>{% else %}<span class="sub">No account (cannot log in)</span>{% endif %}</td>
+                    <td data-label="Role"><span class="role-chip {{ m.role|lower }}">{{ m.get_role_display }}</span></td>
+                    <td class="cell-action" data-label="Order">
                         {% if not forloop.first %}
                         <form method="post" action="{% url 'member_move' m.pk 'up' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move up" title="Move up">&uarr;</button></form>
                         {% endif %}
@@ -76,7 +76,7 @@
                         <form method="post" action="{% url 'member_move' m.pk 'down' %}" class="inline">{% csrf_token %}<button type="submit" class="btn-sm ghost move-btn" aria-label="Move down" title="Move down">&darr;</button></form>
                         {% endif %}
                     </td>
-                    <td class="cell-action">
+                    <td class="cell-action cell-actions-row">
                         <a class="btn-sm ghost btn-with-icon" href="{% url 'member_edit' m.pk %}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             Edit
