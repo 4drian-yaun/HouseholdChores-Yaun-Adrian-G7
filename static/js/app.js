@@ -1456,13 +1456,30 @@
     });
   });
 
-  // 18. Skeleton Loading Screen on Navigation (Principle 12)
+  // 18. Animated Loading Bar & Theme-Aware Skeleton Screen on Navigation (Principle 12)
   const pageSkeleton = document.getElementById("pageSkeleton");
   const pageContent = document.getElementById("pageContent");
+  const skelStatusLabel = document.getElementById("skelStatusLabel");
   let skelTimer = null;
 
-  const scheduleSkeleton = () => {
+  const resolveLoadingLabel = (targetText) => {
+    const clean = (targetText || "").replace(/\s+/g, " ").trim();
+    if (!clean || clean.length > 26 || /log\s*out/i.test(clean)) return "Loading…";
+    return `Loading ${clean}…`;
+  };
+
+  const startTopLoader = () => {
+    document.body.classList.remove("is-navigating");
+    void document.body.offsetWidth;
+    document.body.classList.add("is-navigating");
+  };
+
+  const scheduleSkeleton = (labelText) => {
+    startTopLoader();
     if (!pageSkeleton || !pageContent) return;
+    if (skelStatusLabel) {
+      skelStatusLabel.textContent = resolveLoadingLabel(labelText);
+    }
     window.clearTimeout(skelTimer);
     skelTimer = window.setTimeout(() => {
       pageContent.hidden = true;
@@ -1472,6 +1489,7 @@
 
   const resetSkeleton = () => {
     window.clearTimeout(skelTimer);
+    document.body.classList.remove("is-navigating");
     if (pageSkeleton) pageSkeleton.hidden = true;
     if (pageContent) pageContent.hidden = false;
   };
@@ -1489,11 +1507,20 @@
       return;
     }
     if (link.origin === window.location.origin) {
-      scheduleSkeleton();
+      const label = link.getAttribute("data-loading-label") || link.textContent;
+      scheduleSkeleton(label);
     }
   });
 
-  document.querySelectorAll('form[method="get"]').forEach((form) => {
-    form.addEventListener("submit", scheduleSkeleton);
+  document.querySelectorAll("form").forEach((form) => {
+    form.addEventListener("submit", (e) => {
+      if (e.defaultPrevented) return;
+      const method = (form.getAttribute("method") || "get").toLowerCase();
+      if (method === "get") {
+        scheduleSkeleton("results");
+      } else {
+        startTopLoader();
+      }
+    });
   });
 })();
