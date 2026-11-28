@@ -258,11 +258,11 @@
       try {
         await navigator.clipboard.writeText(value);
         spawnGlobalSparks(btn, 6);
-        const prev = btn.textContent;
+        const prevHtml = btn.innerHTML;
         btn.textContent = "Copied!";
         btn.classList.add("copied");
         window.setTimeout(() => {
-          btn.textContent = prev;
+          btn.innerHTML = prevHtml;
           btn.classList.remove("copied");
         }, 1800);
       } catch {
@@ -276,6 +276,17 @@
           sel.addRange(range);
         }
       }
+    });
+  });
+
+  // 4b. Quick-fill preset chips (onboarding household name suggestions)
+  document.querySelectorAll("[data-fill-target][data-fill-value]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const input = document.getElementById(chip.getAttribute("data-fill-target"));
+      if (!input) return;
+      input.value = chip.getAttribute("data-fill-value") || "";
+      input.focus();
+      input.dispatchEvent(new Event("input", { bubbles: true }));
     });
   });
 
