@@ -564,20 +564,7 @@
     }
   }
 
-  // 4) Global pointer spotlight glow on all cards & KPI tiles
-  if (window.matchMedia("(hover: hover)").matches) {
-    const spotlightSelectors =
-      "[data-spotlight], .card, .stat, .insight-strip, .rotation-chain, .step-card, .feature-card, .landing-cta-banner";
-    document.querySelectorAll(spotlightSelectors).forEach((card) => {
-      card.addEventListener("pointermove", (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty("--mx", `${e.clientX - r.left}px`);
-        card.style.setProperty("--my", `${e.clientY - r.top}px`);
-      });
-    });
-  }
-
-  // 5) Global subtle magnetic spring pull on primary CTAs & action buttons
+  // 4) Global subtle magnetic spring pull on primary CTAs & action buttons
   if (!prefersReducedMotion && window.matchMedia("(hover: hover)").matches) {
     const magTargets = document.querySelectorAll(
       "[data-magnetic], .head-actions .btn-link, .btn-done, .landing-cta .btn-link"
