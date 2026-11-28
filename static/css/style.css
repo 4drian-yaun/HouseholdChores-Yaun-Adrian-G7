@@ -6912,30 +6912,6 @@ button.mode-btn.active {
   margin-left: 3px;
 }
 
-/* Pointer Spotlight Glow on Cards */
-[data-spotlight] {
-  position: relative;
-  overflow: hidden;
-}
-
-[data-spotlight]::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  background: radial-gradient(
-    280px circle at var(--mx, 50%) var(--my, 50%),
-    var(--focus-ring),
-    transparent 70%
-  );
-  transition: opacity 0.25s ease;
-}
-
-[data-spotlight]:hover::before {
-  opacity: 1;
-}
-
 /* Staggered card entrance inside grids */
 [data-stagger-reveal] > * {
   opacity: 0;
@@ -7051,48 +7027,6 @@ button.audience-tag.active {
   inset: -24px -32px;
   mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 20%, transparent 92%);
   -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 20%, transparent 92%);
-}
-
-/* Global pointer spotlight glow on cards & KPI tiles (zero dropdown clipping!) */
-.card,
-.stat,
-.insight-strip,
-.rotation-chain,
-.step-card,
-.feature-card,
-.landing-cta-banner {
-  position: relative;
-}
-
-.card::before,
-.stat::before,
-.insight-strip::before,
-.rotation-chain::before,
-.step-card::before,
-.feature-card::before,
-.landing-cta-banner::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  background: radial-gradient(
-    260px circle at var(--mx, 50%) var(--my, 50%),
-    var(--focus-ring),
-    transparent 70%
-  );
-  transition: opacity 0.24s ease;
-}
-
-.card:hover::before,
-.stat:hover::before,
-.insight-strip:hover::before,
-.rotation-chain:hover::before,
-.step-card:hover::before,
-.feature-card:hover::before,
-.landing-cta-banner:hover::before {
-  opacity: 1;
 }
 
 /* Tactile icon & emblem spring micro-pop when hovering parent card */
