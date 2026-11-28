@@ -1,9 +1,10 @@
 (() => {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // 0. Light / Dark theme toggle
-  const themeToggle = document.getElementById("themeToggle");
+  // 0. Unified Theme & Color Palette Picker
   const themeMeta = document.getElementById("themeColorMeta");
+  const modeButtons = document.querySelectorAll("[data-theme-choice]");
+
   const applyTheme = (theme, persist) => {
     document.documentElement.setAttribute("data-theme", theme);
     if (persist) {
@@ -12,26 +13,94 @@
     if (themeMeta) {
       themeMeta.setAttribute("content", theme === "dark" ? "#1c1e21" : "#fcfcfd");
     }
-    if (themeToggle) {
-      const isDark = theme === "dark";
-      themeToggle.setAttribute("aria-pressed", String(isDark));
-      themeToggle.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
-      themeToggle.setAttribute("title", isDark ? "Switch to light mode" : "Switch to dark mode");
-    }
+    modeButtons.forEach((btn) => {
+      const active = btn.getAttribute("data-theme-choice") === theme;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", String(active));
+    });
   };
 
-  if (themeToggle) {
-    const initial = document.documentElement.getAttribute("data-theme") || "light";
-    applyTheme(initial, false);
+  const initialTheme = document.documentElement.getAttribute("data-theme") || "light";
+  applyTheme(initialTheme, false);
 
-    themeToggle.addEventListener("click", () => {
-      const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-      applyTheme(current === "dark" ? "light" : "dark", true);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    if (!localStorage.getItem("hc-theme")) {
+      applyTheme(e.matches ? "dark" : "light", false);
+    }
+  });
+
+  modeButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const choice = btn.getAttribute("data-theme-choice");
+      if (choice === "light" || choice === "dark") {
+        applyTheme(choice, true);
+      }
+    });
+  });
+
+  const palettePicker = document.getElementById("palettePicker");
+  const paletteToggle = document.getElementById("paletteToggle");
+  const palettePopover = document.getElementById("palettePopover");
+  const paletteSwatches = document.querySelectorAll("[data-palette-choice]");
+
+  const applyPalette = (palette, persist) => {
+    const valid = [
+      "blue", "indigo", "sky", "teal", "emerald",
+      "violet", "pink", "rose", "amber", "slate",
+      "ocean", "sunset", "forest", "lavender", "coffee", "nord",
+      "cherry", "mint", "cyber", "royal", "coral", "aurora",
+      "berry", "citrus", "midnight",
+    ];
+    const next = valid.includes(palette) ? palette : "blue";
+    document.documentElement.setAttribute("data-palette", next);
+    if (persist) {
+      localStorage.setItem("hc-palette", next);
+    }
+    paletteSwatches.forEach((btn) => {
+      const active = btn.getAttribute("data-palette-choice") === next;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", String(active));
+    });
+  };
+
+  applyPalette(document.documentElement.getAttribute("data-palette") || localStorage.getItem("hc-palette") || "blue", false);
+
+  if (palettePicker && paletteToggle && palettePopover) {
+    const setPopoverOpen = (open) => {
+      palettePopover.hidden = !open;
+      paletteToggle.setAttribute("aria-expanded", String(open));
+    };
+
+    paletteToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setPopoverOpen(palettePopover.hidden);
     });
 
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-      if (!localStorage.getItem("hc-theme")) {
-        applyTheme(e.matches ? "dark" : "light", false);
+    paletteSwatches.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        applyPalette(btn.getAttribute("data-palette-choice"), true);
+        if (!prefersReducedMotion) {
+          const mark = document.querySelector(".brand-mark");
+          if (mark) {
+            mark.classList.remove("is-pulsing");
+            void mark.offsetWidth;
+            mark.classList.add("is-pulsing");
+          }
+          spawnGlobalSparks(btn);
+        }
+      });
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!palettePopover.hidden && !palettePicker.contains(e.target)) {
+        setPopoverOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !palettePopover.hidden) {
+        setPopoverOpen(false);
+        paletteToggle.focus();
       }
     });
   }
@@ -108,6 +177,74 @@
     }
   });
 
+  // Helper: micro particle spark burst (reused across all pages)
+  const spawnGlobalSparks = (el, count = 7) => {
+    if (prefersReducedMotion || !el) return;
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const colors = ["var(--teal)", "var(--teal-2)", "var(--ok)", "var(--sun)"];
+    for (let i = 0; i < count; i += 1) {
+      const spark = document.createElement("span");
+      spark.className = "spark-dot";
+      const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
+      const dist = 18 + Math.random() * 18;
+      spark.style.left = `${cx - 3}px`;
+      spark.style.top = `${cy - 3}px`;
+      spark.style.setProperty("--tx", `${Math.cos(angle) * dist}px`);
+      spark.style.setProperty("--ty", `${Math.sin(angle) * dist}px`);
+      spark.style.setProperty("--spark-c", colors[i % colors.length]);
+      document.body.appendChild(spark);
+      window.setTimeout(() => spark.remove(), 540);
+    }
+  };
+
+  // Helper: interactive stagger dot grid (hero + page headers + auth screens)
+  const initKineticGrid = (gridEl, hostEl, colsDesktop, rowsDesktop, colsMobile, rowsMobile) => {
+    if (!gridEl || !hostEl || prefersReducedMotion) return;
+    const isCompact = window.innerWidth < 640;
+    const cols = isCompact ? colsMobile : colsDesktop;
+    const rows = isCompact ? rowsMobile : rowsDesktop;
+    gridEl.style.setProperty("--grid-cols", String(cols));
+    gridEl.style.setProperty("--grid-rows", String(rows));
+
+    const dots = [];
+    for (let i = 0; i < cols * rows; i += 1) {
+      const dot = document.createElement("span");
+      dot.className = "kinetic-dot";
+      gridEl.appendChild(dot);
+      dots.push(dot);
+    }
+
+    const triggerRipple = (originIdx) => {
+      const ox = originIdx % cols;
+      const oy = Math.floor(originIdx / cols);
+      dots.forEach((dot, idx) => {
+        const dist = Math.hypot((idx % cols) - ox, Math.floor(idx / cols) - oy);
+        if (dist > 4.2) return;
+        const delay = Math.round(dist * 46);
+        window.setTimeout(() => {
+          dot.classList.add("is-wave");
+          window.setTimeout(() => dot.classList.remove("is-wave"), 360);
+        }, delay);
+      });
+    };
+
+    let lastRipple = 0;
+    hostEl.addEventListener("pointermove", (e) => {
+      const now = performance.now();
+      if (now - lastRipple < 170) return;
+      lastRipple = now;
+      const r = gridEl.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const col = Math.max(0, Math.min(cols - 1, Math.floor(((e.clientX - r.left) / r.width) * cols)));
+      const row = Math.max(0, Math.min(rows - 1, Math.floor(((e.clientY - r.top) / r.height) * rows)));
+      triggerRipple(row * cols + col);
+    });
+
+    window.setTimeout(() => triggerRipple(Math.floor((rows * cols) / 2)), 260);
+  };
+
   // 4. Copy username callout button
   document.querySelectorAll(".copy-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -115,6 +252,7 @@
       if (!value) return;
       try {
         await navigator.clipboard.writeText(value);
+        spawnGlobalSparks(btn, 6);
         const prev = btn.textContent;
         btn.textContent = "Copied!";
         btn.classList.add("copied");
@@ -257,12 +395,24 @@
     }
   }
 
-  // 10. Landing page interactive preview chore board
+  // 10. Enhanced Landing Page Interactive Preview Board (Checkboxes + Simulate Next Monday + Sparks)
   const demoChart = document.querySelector("[data-demo-chart]");
   if (demoChart) {
-    const items = demoChart.querySelectorAll("[data-demo-item]");
+    const demoMembers = [
+      { name: "Ana", initial: "A", cls: "" },
+      { name: "Marco", initial: "M", cls: "b" },
+      { name: "Jules", initial: "J", cls: "c" },
+      { name: "Kira", initial: "K", cls: "d" },
+    ];
+    const items = Array.from(demoChart.querySelectorAll("[data-demo-item]"));
     const bar = demoChart.querySelector("[data-demo-bar]");
     const countEl = demoChart.querySelector("[data-demo-count]");
+    const weekLabel = demoChart.querySelector("[data-demo-week-label]");
+    const footEl = demoChart.querySelector("[data-demo-foot]");
+    const rotateBtn = demoChart.querySelector("[data-demo-rotate]");
+    let demoWeek = 1;
+
+    const spawnSparks = (el) => spawnGlobalSparks(el, 7);
 
     const syncDemo = () => {
       const total = items.length;
@@ -272,6 +422,13 @@
       });
       if (bar) bar.style.width = `${Math.round((done / total) * 100)}%`;
       if (countEl) countEl.textContent = `${done}/${total}`;
+      const allDone = done === total;
+      demoChart.classList.toggle("is-celebrating", allDone);
+      if (footEl) {
+        footEl.innerHTML = allDone
+          ? "All chores complete! Press <strong>Next Mon</strong> to rotate everyone forward."
+          : "Click checkboxes or press <strong>Next Mon</strong> to preview rotation";
+      }
     };
 
     items.forEach((li) => {
@@ -279,6 +436,7 @@
       const toggle = () => {
         const isDone = li.classList.toggle("done");
         if (btn) btn.classList.toggle("done", isDone);
+        if (isDone) spawnSparks(btn || li);
         syncDemo();
       };
       if (btn) {
@@ -289,13 +447,513 @@
       }
       li.addEventListener("click", toggle);
     });
+
+    if (rotateBtn) {
+      rotateBtn.addEventListener("click", () => {
+        demoWeek += 1;
+        const offset = (demoWeek - 1) % demoMembers.length;
+        if (weekLabel) {
+          weekLabel.textContent = demoWeek === 1 ? "Week 1 · This week" : `Week ${demoWeek} · Rotated`;
+        }
+        if (!prefersReducedMotion) {
+          rotateBtn.classList.remove("is-spinning");
+          void rotateBtn.offsetWidth;
+          rotateBtn.classList.add("is-spinning");
+        }
+        items.forEach((li, idx) => {
+          const cur = demoMembers[(idx + offset) % demoMembers.length];
+          const nxt = demoMembers[(idx + offset + 1) % demoMembers.length];
+          const avatar = li.querySelector("[data-demo-avatar]");
+          const sub = li.querySelector("[data-demo-sub]");
+          const btn = li.querySelector("button.state");
+          if (avatar) {
+            avatar.textContent = cur.initial;
+            avatar.className = `who${cur.cls ? " " + cur.cls : ""}`;
+          }
+          if (sub) {
+            sub.textContent = `${cur.name} · Next Mon: ${nxt.name}`;
+          }
+          li.classList.remove("done");
+          if (btn) btn.classList.remove("done");
+          if (!prefersReducedMotion) {
+            li.classList.remove("is-rotating");
+            li.style.animationDelay = `${idx * 55}ms`;
+            void li.offsetWidth;
+            li.classList.add("is-rotating");
+          }
+        });
+        syncDemo();
+      });
+    }
+
+    // Subtle 3D tilt on desktop pointer move
+    if (!prefersReducedMotion && window.matchMedia("(hover: hover)").matches) {
+      demoChart.addEventListener("pointermove", (e) => {
+        const r = demoChart.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        demoChart.style.transform = `perspective(900px) rotateX(${(-py * 5).toFixed(2)}deg) rotateY(${(px * 5).toFixed(2)}deg)`;
+      });
+      demoChart.addEventListener("pointerleave", () => {
+        demoChart.style.transform = "";
+      });
+    }
   }
 
-  // 11. Analytics: interactive Donut <-> Legend hover highlight
+  // 10b. Global Anime.js-Inspired Kinetic Effects (Active Across ALL Pages)
+  // 1) Global scroll progress bar (GPU scaleX at native refresh rate, zero lag)
+  const progressBar = document.querySelector("[data-scroll-progress]");
+  if (progressBar) {
+    let progressTicking = false;
+    const syncScrollProgress = () => {
+      progressTicking = false;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      progressBar.style.transform = `scaleX(${ratio})`;
+    };
+    const onScrollProgress = () => {
+      if (!progressTicking) {
+        progressTicking = true;
+        requestAnimationFrame(syncScrollProgress);
+      }
+    };
+    window.addEventListener("scroll", onScrollProgress, { passive: true });
+    window.addEventListener("resize", onScrollProgress, { passive: true });
+    syncScrollProgress();
+  }
+
+  // 2) Staggered word-by-word spring headline (landing + page headers)
+  const headlineTargets = document.querySelectorAll("[data-stagger-words], .page-head h1");
+  if (!prefersReducedMotion) {
+    headlineTargets.forEach((h1) => {
+      // Only split pure text headings (preserve inline badges/tags if any)
+      if (h1.children.length > 0) return;
+      const words = h1.textContent.trim().split(/\s+/);
+      if (!words.length || !words[0]) return;
+      h1.textContent = "";
+      words.forEach((word, i) => {
+        const span = document.createElement("span");
+        span.className = "kinetic-word";
+        span.style.setProperty("--wd", `${Math.min(i * 65, 320)}ms`);
+        span.textContent = word;
+        h1.appendChild(span);
+        if (i < words.length - 1) h1.appendChild(document.createTextNode(" "));
+      });
+    });
+  }
+
+  // 3) Interactive stagger dot grid (hero on landing, subtle ambient grid on page-head & auth pages)
+  const heroGrid = document.querySelector("[data-kinetic-grid]");
+  if (heroGrid) {
+    initKineticGrid(heroGrid, heroGrid.closest(".landing-hero"), 11, 6, 6, 5);
+  } else if (!prefersReducedMotion) {
+    const pageHead = document.querySelector(".page-head");
+    const authBox = document.querySelector(".auth.auth-centered");
+    if (pageHead) {
+      const g = document.createElement("div");
+      g.className = "kinetic-grid kinetic-grid-subtle";
+      g.setAttribute("aria-hidden", "true");
+      pageHead.prepend(g);
+      initKineticGrid(g, pageHead, 12, 3, 6, 3);
+    } else if (authBox) {
+      const g = document.createElement("div");
+      g.className = "kinetic-grid kinetic-grid-subtle";
+      g.setAttribute("aria-hidden", "true");
+      authBox.prepend(g);
+      initKineticGrid(g, authBox, 10, 6, 6, 5);
+    }
+  }
+
+  // 4) Global pointer spotlight glow on all cards & KPI tiles
+  if (window.matchMedia("(hover: hover)").matches) {
+    const spotlightSelectors =
+      "[data-spotlight], .card, .stat, .insight-strip, .rotation-chain, .step-card, .feature-card, .landing-cta-banner";
+    document.querySelectorAll(spotlightSelectors).forEach((card) => {
+      card.addEventListener("pointermove", (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        card.style.setProperty("--my", `${e.clientY - r.top}px`);
+      });
+    });
+  }
+
+  // 5) Global subtle magnetic spring pull on primary CTAs & action buttons
+  if (!prefersReducedMotion && window.matchMedia("(hover: hover)").matches) {
+    const magTargets = document.querySelectorAll(
+      "[data-magnetic], .head-actions .btn-link, .btn-done, .landing-cta .btn-link"
+    );
+    magTargets.forEach((btn) => {
+      btn.addEventListener("pointermove", (e) => {
+        const r = btn.getBoundingClientRect();
+        const dx = ((e.clientX - r.left) / r.width - 0.5) * 7;
+        const dy = ((e.clientY - r.top) / r.height - 0.5) * 5;
+        btn.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`;
+      });
+      btn.addEventListener("pointerleave", () => {
+        btn.style.transform = "";
+      });
+    });
+  }
+
+  // 6) Global staggered row/item cascade on tables, member bars & info lists
+  if (!prefersReducedMotion) {
+    document.querySelectorAll("tbody, .member-bars, .info-list, .quick-links").forEach((group) => {
+      Array.from(group.children).forEach((child, idx) => {
+        if (idx > 12) return;
+        child.classList.add("kinetic-row");
+        child.style.setProperty("--rd", `${idx * 38}ms`);
+      });
+    });
+  }
+
+  // 7) Celebratory spark burst on clicking real "Mark done ✓" buttons
+  document.querySelectorAll(".btn-done").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      spawnGlobalSparks(btn, 8);
+    });
+  });
+
+  // 7b) Sliding spring indicator pill in desktop topbar navigation
+  const topNav = document.getElementById("mainNav");
+  if (topNav) {
+    const navLinks = Array.from(topNav.querySelectorAll("a:not(.nav-cta):not(.nav-login)"));
+    if (navLinks.length) {
+      const glider = document.createElement("span");
+      glider.className = "nav-glider";
+      glider.setAttribute("aria-hidden", "true");
+      topNav.prepend(glider);
+      topNav.classList.add("has-glider");
+
+      const moveNavGlider = (target) => {
+        const drawerBp = topNav.querySelector(".nav-group-primary") ? 900 : 860;
+        if (!target || window.innerWidth <= drawerBp) {
+          glider.style.opacity = "0";
+          return;
+        }
+        glider.style.width = `${target.offsetWidth}px`;
+        glider.style.height = `${target.offsetHeight}px`;
+        glider.style.transform = `translate(${target.offsetLeft}px, ${target.offsetTop}px)`;
+        glider.style.opacity = "1";
+      };
+
+      const syncToActiveNav = () => {
+        const active = topNav.querySelector("a.active:not(.nav-cta):not(.nav-login)");
+        moveNavGlider(active);
+      };
+
+      navLinks.forEach((link) => {
+        link.addEventListener("mouseenter", () => moveNavGlider(link));
+        link.addEventListener("focus", () => moveNavGlider(link));
+      });
+      topNav.addEventListener("mouseleave", syncToActiveNav);
+      window.addEventListener("resize", syncToActiveNav, { passive: true });
+      window.addEventListener("load", syncToActiveNav);
+      // Keep glider synced whenever scroll-spy updates .active
+      const navClassObs = new MutationObserver(syncToActiveNav);
+      navLinks.forEach((l) => navClassObs.observe(l, { attributes: true, attributeFilter: ["class"] }));
+      requestAnimationFrame(syncToActiveNav);
+    }
+  }
+
+  // 7c) Sliding spring indicator inside segmented filter pills (Dashboard & Analytics)
+  document.querySelectorAll(".filter-pills").forEach((group) => {
+    const pills = Array.from(group.querySelectorAll(".pill"));
+    if (pills.length < 2) return;
+    const pillGlider = document.createElement("span");
+    pillGlider.className = "pill-glider";
+    pillGlider.setAttribute("aria-hidden", "true");
+    group.prepend(pillGlider);
+    group.classList.add("has-pill-glider");
+
+    const movePillGlider = (target) => {
+      if (!target) return;
+      pillGlider.style.width = `${target.offsetWidth}px`;
+      pillGlider.style.height = `${target.offsetHeight}px`;
+      pillGlider.style.transform = `translate(${target.offsetLeft}px, ${target.offsetTop}px)`;
+      pillGlider.style.opacity = "1";
+    };
+
+    const syncActivePill = () => {
+      const active = group.querySelector(".pill.active") || pills[0];
+      movePillGlider(active);
+    };
+
+    pills.forEach((p) => {
+      p.addEventListener("click", () => requestAnimationFrame(syncActivePill));
+    });
+    window.addEventListener("resize", syncActivePill, { passive: true });
+    window.addEventListener("load", syncActivePill);
+    requestAnimationFrame(syncActivePill);
+  });
+
+  // 8) Staggered card reveals for grids
+  const staggerContainers = document.querySelectorAll("[data-stagger-reveal]");
+  staggerContainers.forEach((container) => {
+    Array.from(container.children).forEach((child, idx) => {
+      child.style.setProperty("--sd", `${idx * 85}ms`);
+    });
+    if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+      container.classList.add("in-view");
+    } else {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              container.classList.add("in-view");
+              obs.unobserve(container);
+            }
+          });
+        },
+        { threshold: 0.14 }
+      );
+      obs.observe(container);
+    }
+  });
+
+  // 9) Landing-only interactive widgets (Scroll-Spy Nav, Timeline Playground & Audience Strip)
+  const landingRoot = document.querySelector("[data-landing-enhanced]");
+  if (landingRoot) {
+    // Smooth animated scroll + Scroll-spy for top navigation section links
+    const navSectionLinks = Array.from(document.querySelectorAll("[data-nav-section]"));
+    const trackedSections = ["how-it-works", "interactive-timeline", "features"]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    if (navSectionLinks.length && trackedSections.length) {
+      let scrollAnimId = null;
+      let isProgrammaticScroll = false;
+
+      const cancelScrollAnim = () => {
+        if (scrollAnimId !== null) {
+          cancelAnimationFrame(scrollAnimId);
+          scrollAnimId = null;
+        }
+        isProgrammaticScroll = false;
+      };
+
+      // Never fight manual user scroll
+      window.addEventListener("wheel", cancelScrollAnim, { passive: true });
+      window.addEventListener("touchstart", cancelScrollAnim, { passive: true });
+
+      const setActiveNav = (key) => {
+        navSectionLinks.forEach((link) => {
+          link.classList.toggle("active", link.getAttribute("data-nav-section") === key);
+        });
+      };
+
+      const playSectionArrival = (sectionEl) => {
+        if (!sectionEl) return;
+        sectionEl.classList.remove("section-arrived");
+        void sectionEl.offsetWidth;
+        sectionEl.classList.add("section-arrived");
+
+        // Gentle continuous accent glow pulse across cards (zero jump or opacity dip)
+        const cards = sectionEl.querySelectorAll(".step-card, .feature-card, .playground-card");
+        cards.forEach((card, idx) => {
+          card.classList.remove("card-arrive-pop");
+          card.style.setProperty("--ad", `${idx * 75}ms`);
+          void card.offsetWidth;
+          card.classList.add("card-arrive-pop");
+        });
+      };
+
+      const smoothScrollTo = (targetY, targetSection) => {
+        cancelScrollAnim();
+        const startY = window.scrollY;
+        const distance = targetY - startY;
+        if (Math.abs(distance) < 2) {
+          if (targetSection) playSectionArrival(targetSection);
+          return;
+        }
+        // Longer, velvety glide duration so motion feels fluid and never abrupt
+        const duration = Math.min(1250, Math.max(780, Math.abs(distance) * 0.7));
+        const startTime = performance.now();
+        let arrivalFired = false;
+        isProgrammaticScroll = true;
+
+        // Smooth quintic S-curve: gentle take-off + silky, prolonged landing
+        const easeInOutQuint = (t) =>
+          t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
+
+        const step = (now) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = easeInOutQuint(progress);
+          window.scrollTo({ top: startY + distance * eased, behavior: "instant" });
+
+          // Fire subtle arrival glow seamlessly near the end of deceleration
+          if (!arrivalFired && progress >= 0.8 && targetSection) {
+            arrivalFired = true;
+            playSectionArrival(targetSection);
+          }
+
+          if (progress < 1) {
+            scrollAnimId = requestAnimationFrame(step);
+          } else {
+            scrollAnimId = null;
+            isProgrammaticScroll = false;
+          }
+        };
+
+        scrollAnimId = requestAnimationFrame(step);
+      };
+
+      const syncActiveSection = () => {
+        if (isProgrammaticScroll) return;
+        const y = window.scrollY + 140;
+        let currentKey = "top";
+        trackedSections.forEach((sec) => {
+          if (y >= sec.offsetTop) {
+            currentKey = sec.id;
+          }
+        });
+        setActiveNav(currentKey);
+      };
+
+      navSectionLinks.forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const href = link.getAttribute("href") || "";
+          if (!href.startsWith("#")) return;
+          e.preventDefault();
+
+          const key = link.getAttribute("data-nav-section");
+          setActiveNav(key);
+
+          if (key === "top") {
+            if (history.replaceState) history.replaceState(null, "", window.location.pathname);
+            smoothScrollTo(0, document.querySelector(".landing-hero"));
+            return;
+          }
+
+          const targetSection = document.getElementById(key);
+          if (!targetSection) return;
+
+          if (history.replaceState) history.replaceState(null, "", `#${key}`);
+          const headerOffset = (topbar ? topbar.offsetHeight : 64) + 20;
+          const targetY = Math.max(0, targetSection.getBoundingClientRect().top + window.scrollY - headerOffset);
+
+          smoothScrollTo(targetY, targetSection);
+        });
+      });
+
+      window.addEventListener("scroll", syncActiveSection, { passive: true });
+      syncActiveSection();
+    }
+
+    // Interactive Timeline Rotation Playground
+    const playground = document.querySelector("[data-rotation-playground]");
+    if (playground) {
+      const pgMembers = [
+        { name: "Ana", initial: "A", cls: "" },
+        { name: "Marco", initial: "M", cls: "avatar-c1" },
+        { name: "Jules", initial: "J", cls: "avatar-c2" },
+        { name: "Kira", initial: "K", cls: "avatar-c3" },
+      ];
+      const range = playground.querySelector("[data-pg-range]");
+      const badge = playground.querySelector("[data-pg-week-badge]");
+      const weeksCount = playground.querySelector("[data-pg-weeks-count]");
+      const chipsWrap = playground.querySelector("[data-pg-chips]");
+      const lanes = Array.from(playground.querySelectorAll("[data-pg-lane]"));
+      const playBtn = playground.querySelector("[data-pg-play]");
+      const playLabel = playground.querySelector("[data-pg-play-label]");
+      const iconPlay = playground.querySelector(".pg-icon-play");
+      const iconPause = playground.querySelector(".pg-icon-pause");
+      let playTimer = null;
+
+      const renderWeek = (weekNum) => {
+        const w = Math.max(1, Math.min(8, Number(weekNum) || 1));
+        const offset = (w - 1) % pgMembers.length;
+        if (range) range.value = String(w);
+        if (badge) {
+          badge.textContent = `Week ${w}`;
+          if (!prefersReducedMotion) {
+            badge.classList.add("pop");
+            window.setTimeout(() => badge.classList.remove("pop"), 220);
+          }
+        }
+        if (weeksCount) {
+          weeksCount.textContent = w === 1 ? "1 week" : `${w} weeks`;
+        }
+        lanes.forEach((lane, idx) => {
+          const m = pgMembers[(idx + offset) % pgMembers.length];
+          const av = lane.querySelector("[data-pg-avatar]");
+          const nameEl = lane.querySelector("[data-pg-member]");
+          if (av) {
+            av.textContent = m.initial;
+            av.className = `avatar avatar-sm${m.cls ? " " + m.cls : ""}`;
+          }
+          if (nameEl) nameEl.textContent = m.name;
+          if (!prefersReducedMotion) {
+            lane.classList.remove("is-shifting");
+            lane.style.animationDelay = `${idx * 45}ms`;
+            void lane.offsetWidth;
+            lane.classList.add("is-shifting");
+          }
+        });
+        if (chipsWrap) {
+          chipsWrap.innerHTML = pgMembers
+            .map((m) => `<span class="fairness-chip">${m.name} <b>${w}</b></span>`)
+            .join("");
+        }
+      };
+
+      if (range) {
+        range.addEventListener("input", () => renderWeek(range.value));
+      }
+
+      if (playBtn) {
+        const setPlaying = (playing) => {
+          playBtn.setAttribute("aria-pressed", String(playing));
+          if (playLabel) playLabel.textContent = playing ? "Pause" : "Auto-play";
+          if (iconPlay) iconPlay.hidden = playing;
+          if (iconPause) iconPause.hidden = !playing;
+          window.clearInterval(playTimer);
+          if (playing) {
+            playTimer = window.setInterval(() => {
+              const cur = Number(range?.value || 1);
+              renderWeek(cur >= 8 ? 1 : cur + 1);
+            }, 1300);
+          }
+        };
+
+        playBtn.addEventListener("click", () => {
+          const isPlaying = playBtn.getAttribute("aria-pressed") === "true";
+          setPlaying(!isPlaying);
+        });
+      }
+    }
+
+    // Interactive Audience Strip
+    const audiencePicker = document.querySelector("[data-audience-picker]");
+    if (audiencePicker) {
+      const tags = audiencePicker.querySelectorAll(".audience-tag");
+      const output = audiencePicker.querySelector("[data-audience-output]");
+      tags.forEach((tag) => {
+        tag.addEventListener("click", () => {
+          tags.forEach((t) => t.classList.toggle("active", t === tag));
+          const tip = tag.getAttribute("data-audience-tip");
+          if (output && tip) {
+            output.textContent = tip;
+            if (!prefersReducedMotion) {
+              output.style.animation = "none";
+              void output.offsetWidth;
+              output.style.animation = "";
+            }
+          }
+        });
+      });
+    }
+  }
+
+  // 11. Analytics: interactive Donut <-> Legend hover highlight + dynamic center readout
   const donutGroup = document.querySelector("[data-donut-group]");
   if (donutGroup) {
     const segs = donutGroup.querySelectorAll("[data-seg]");
     const cards = donutGroup.querySelectorAll("[data-legend]");
+    const centerPct = donutGroup.querySelector("[data-donut-pct]");
+    const centerLabel = donutGroup.querySelector("[data-donut-label]");
+    const defaultPct = donutGroup.getAttribute("data-default-pct") || "";
+    const defaultLabel = donutGroup.getAttribute("data-default-label") || "Completed";
 
     const highlight = (key) => {
       segs.forEach((s) => {
@@ -306,6 +964,18 @@
       cards.forEach((c) => {
         c.classList.toggle("is-highlighted", c.getAttribute("data-legend") === key);
       });
+      if (centerPct && centerLabel) {
+        if (key === "done") {
+          centerPct.textContent = donutGroup.getAttribute("data-done-pct") || defaultPct;
+          centerLabel.textContent = donutGroup.getAttribute("data-done-label") || defaultLabel;
+        } else if (key === "missed") {
+          centerPct.textContent = donutGroup.getAttribute("data-missed-pct") || defaultPct;
+          centerLabel.textContent = donutGroup.getAttribute("data-missed-label") || "Missed";
+        } else {
+          centerPct.textContent = defaultPct;
+          centerLabel.textContent = defaultLabel;
+        }
+      }
     };
 
     const clear = () => highlight(null);
@@ -313,12 +983,91 @@
     cards.forEach((card) => {
       const key = card.getAttribute("data-legend");
       card.addEventListener("mouseenter", () => highlight(key));
+      card.addEventListener("focus", () => highlight(key));
       card.addEventListener("mouseleave", clear);
+      card.addEventListener("blur", clear);
     });
     segs.forEach((seg) => {
       const key = seg.getAttribute("data-seg");
       seg.addEventListener("mouseenter", () => highlight(key));
       seg.addEventListener("mouseleave", clear);
+    });
+  }
+
+  // 11b. Analytics: Interactive SVG Area Chart hover crosshair + Area/Bars & Chore toggles
+  const areaChart = document.querySelector("[data-area-chart]");
+  if (areaChart) {
+    const svg = areaChart.querySelector("svg");
+    const crosshair = areaChart.querySelector("[data-area-crosshair]");
+    const tooltip = areaChart.querySelector("[data-area-tooltip]");
+    const ttTitle = areaChart.querySelector("[data-at-title]");
+    const ttDetail = areaChart.querySelector("[data-at-detail]");
+    const nodes = areaChart.querySelectorAll("[data-area-node]");
+
+    const showNode = (node) => {
+      nodes.forEach((n) => n.classList.toggle("is-active", n === node));
+      const x = parseFloat(node.getAttribute("data-x") || "0");
+      const y = parseFloat(node.getAttribute("data-y") || "0");
+      if (crosshair) {
+        crosshair.setAttribute("x1", String(x));
+        crosshair.setAttribute("x2", String(x));
+        crosshair.classList.add("is-visible");
+      }
+      if (tooltip && svg) {
+        const rect = svg.getBoundingClientRect();
+        const leftPx = (x / 520) * rect.width;
+        const topPx = (y / 170) * rect.height;
+        tooltip.style.left = `${Math.max(66, Math.min(rect.width - 66, leftPx))}px`;
+        tooltip.style.top = `${Math.max(40, topPx)}px`;
+        if (ttTitle) ttTitle.textContent = node.getAttribute("data-label") || "";
+        if (ttDetail) ttDetail.textContent = node.getAttribute("data-detail") || "";
+        tooltip.hidden = false;
+      }
+    };
+
+    const hideNode = () => {
+      nodes.forEach((n) => n.classList.remove("is-active"));
+      if (crosshair) crosshair.classList.remove("is-visible");
+      if (tooltip) tooltip.hidden = true;
+    };
+
+    nodes.forEach((node) => {
+      node.addEventListener("mouseenter", () => showNode(node));
+      node.addEventListener("focus", () => showNode(node));
+      node.addEventListener("click", () => showNode(node));
+    });
+    areaChart.addEventListener("mouseleave", hideNode);
+  }
+
+  // Trend chart mode toggle (Area vs Bars)
+  const trendModeGroup = document.querySelector("[data-trend-mode]");
+  if (trendModeGroup) {
+    const modeBtns = trendModeGroup.querySelectorAll(".pill");
+    const panels = document.querySelectorAll("[data-trend-panel]");
+    modeBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const mode = btn.getAttribute("data-mode");
+        modeBtns.forEach((b) => b.classList.toggle("active", b === btn));
+        panels.forEach((p) => {
+          p.hidden = p.getAttribute("data-trend-panel") !== mode;
+        });
+      });
+    });
+  }
+
+  // Chore reliability view toggle (Most missed vs All chores)
+  const choreViewGroup = document.querySelector("[data-chore-view]");
+  if (choreViewGroup) {
+    const viewBtns = choreViewGroup.querySelectorAll(".pill");
+    const panels = document.querySelectorAll("[data-chore-panel]");
+    viewBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const view = btn.getAttribute("data-view");
+        viewBtns.forEach((b) => b.classList.toggle("active", b === btn));
+        panels.forEach((p) => {
+          p.hidden = p.getAttribute("data-chore-panel") !== view;
+        });
+      });
     });
   }
 
@@ -453,10 +1202,92 @@
     });
   });
 
-  // 16. Live Table Search for Members & Chores tables (Principle 11)
+  // 16. Live Table Search + Coordinated Filters for Members & Chores tables
+  const memberFilterGroup = document.querySelector("[data-member-filter]");
+  const memberSearchInput = document.querySelector('[data-table-search=".member-row"]');
+  if (memberFilterGroup || memberSearchInput) {
+    const buttons = memberFilterGroup ? memberFilterGroup.querySelectorAll(".pill") : [];
+    const rows = document.querySelectorAll(".member-row");
+    const emptyMsg = document.querySelector(".filter-empty");
+    let activeMode = "all";
+    let searchQuery = "";
+
+    const applyMemberFilters = () => {
+      let visible = 0;
+      rows.forEach((row) => {
+        const role = row.getAttribute("data-role");
+        const linked = row.getAttribute("data-linked") === "true";
+        let show = true;
+        if (activeMode === "admin") show = role === "admin";
+        else if (activeMode === "linked") show = linked;
+        else if (activeMode === "unlinked") show = !linked;
+        if (show && searchQuery) {
+          show = (row.textContent || "").toLowerCase().includes(searchQuery);
+        }
+        row.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (emptyMsg) emptyMsg.hidden = visible > 0;
+    };
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeMode = btn.getAttribute("data-filter") || "all";
+        buttons.forEach((b) => b.classList.toggle("active", b === btn));
+        applyMemberFilters();
+      });
+    });
+    if (memberSearchInput) {
+      memberSearchInput.addEventListener("input", () => {
+        searchQuery = memberSearchInput.value.trim().toLowerCase();
+        applyMemberFilters();
+      });
+    }
+  }
+
+  const choreListFilterGroup = document.querySelector("[data-chore-list-filter]");
+  const choreListSearchInput = document.querySelector('[data-table-search=".chore-list-row"]');
+  if (choreListFilterGroup || choreListSearchInput) {
+    const buttons = choreListFilterGroup ? choreListFilterGroup.querySelectorAll(".pill") : [];
+    const rows = document.querySelectorAll(".chore-list-row");
+    const emptyMsg = document.querySelector(".filter-empty");
+    let activeMode = "all";
+    let searchQuery = "";
+
+    const applyChoreListFilters = () => {
+      let visible = 0;
+      rows.forEach((row) => {
+        const status = row.getAttribute("data-status");
+        let show = true;
+        if (activeMode === "pending") show = status === "pending";
+        else if (activeMode === "completed") show = status === "completed";
+        if (show && searchQuery) {
+          show = (row.textContent || "").toLowerCase().includes(searchQuery);
+        }
+        row.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (emptyMsg) emptyMsg.hidden = visible > 0;
+    };
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeMode = btn.getAttribute("data-filter") || "all";
+        buttons.forEach((b) => b.classList.toggle("active", b === btn));
+        applyChoreListFilters();
+      });
+    });
+    if (choreListSearchInput) {
+      choreListSearchInput.addEventListener("input", () => {
+        searchQuery = choreListSearchInput.value.trim().toLowerCase();
+        applyChoreListFilters();
+      });
+    }
+  }
+
   document.querySelectorAll("[data-table-search]").forEach((input) => {
     const selector = input.getAttribute("data-table-search");
-    if (!selector || selector === ".chore-row") return;
+    if (!selector || selector === ".chore-row" || selector === ".member-row" || selector === ".chore-list-row") return;
     const card = input.closest(".card") || document;
     const rows = card.querySelectorAll(selector);
     const emptyMsg = card.querySelector(".filter-empty");

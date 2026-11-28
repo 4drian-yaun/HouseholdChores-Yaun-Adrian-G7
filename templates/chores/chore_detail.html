@@ -30,41 +30,6 @@
     {% endif %}
 </div>
 
-<div class="stats stats-4 stagger">
-    <div class="stat kpi-card animate-in">
-        <span class="stat-label">Closed weeks</span>
-        <div class="kpi-row">
-            <strong class="kpi-value">{{ closed_total }}</strong>
-            <span class="pct-pill ok">Archived</span>
-        </div>
-        <small class="kpi-sub">Completed + missed</small>
-    </div>
-    <div class="stat kpi-card animate-in">
-        <span class="stat-label">Completed</span>
-        <div class="kpi-row">
-            <strong class="kpi-value">{{ done }}</strong>
-            <span class="pct-pill ok">On time</span>
-        </div>
-        <small class="kpi-sub">Finished on time</small>
-    </div>
-    <div class="stat kpi-card stat-warn animate-in">
-        <span class="stat-label">Missed</span>
-        <div class="kpi-row">
-            <strong class="kpi-value">{{ missed }}</strong>
-            <span class="pct-pill {% if missed == 0 %}ok{% else %}warn{% endif %}">{% if missed == 0 %}Perfect{% else %}Missed{% endif %}</span>
-        </div>
-        <small class="kpi-sub">{% if missed == 0 %}Perfect record{% else %}Unfinished{% endif %}</small>
-    </div>
-    <div class="stat kpi-card animate-in">
-        <span class="stat-label">Completion rate</span>
-        <div class="kpi-row">
-            <strong class="kpi-value">{{ rate }}%</strong>
-            <span class="pct-pill {% if rate >= 80 %}ok{% elif rate >= 50 %}sun{% else %}warn{% endif %}">Rate</span>
-        </div>
-        <small class="kpi-sub">Excludes current pending</small>
-    </div>
-</div>
-
 {% if current or next_member %}
 <div class="insight-strip animate-in">
     <div class="insight-item">
@@ -92,6 +57,13 @@
             <h2>Assignment history ({{ assignments|length }})</h2>
             <p class="card-sub">Every weekly rotation record for "{{ chore.name }}".</p>
         </div>
+        {% if closed_total %}
+        <div class="mini-stats">
+            <span class="status completed">{{ done }} done</span>
+            <span class="status missed">{{ missed }} missed</span>
+            <span class="pct-pill {% if rate >= 80 %}ok{% elif rate >= 50 %}sun{% else %}warn{% endif %}">{{ rate }}%</span>
+        </div>
+        {% endif %}
     </div>
     {% if assignments %}
     <div class="table-wrap">

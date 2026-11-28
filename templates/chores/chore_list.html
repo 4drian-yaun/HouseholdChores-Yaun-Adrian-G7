@@ -7,7 +7,10 @@
         <p class="muted">Every active chore automatically rotates to the next member each Monday.</p>
     </div>
     <div class="head-actions">
-        <a class="btn-sm ghost" href="{% url 'member_list' %}">Rotation order</a>
+        <a class="btn-sm ghost btn-with-icon" href="{% url 'member_list' %}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+            Rotation order
+        </a>
         <a class="btn-link btn-inline btn-with-icon" href="{% url 'chore_add' %}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add chore
@@ -19,12 +22,19 @@
     <div class="card-head">
         <div>
             <h2>Active chores ({{ active_chores|length }})</h2>
-            <p class="card-sub">See who has each task now and who gets it next Monday.</p>
+            <p class="card-sub">Click any chore to view its assignment history and completion record.</p>
         </div>
-        {% if active_chores|length > 2 %}
-        <div class="search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="search" placeholder="Search chores..." aria-label="Search chores" data-table-search=".chore-list-row">
+        {% if active_chores|length > 1 %}
+        <div class="toolbar-right">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" placeholder="Search chores..." aria-label="Search chores" data-table-search=".chore-list-row">
+            </div>
+            <div class="filter-pills" role="group" aria-label="Filter chores by status" data-chore-list-filter>
+                <button type="button" class="pill active" data-filter="all">All</button>
+                <button type="button" class="pill" data-filter="pending">Pending</button>
+                <button type="button" class="pill" data-filter="completed">Done</button>
+            </div>
         </div>
         {% endif %}
     </div>
@@ -32,21 +42,29 @@
     <div class="table-wrap">
         <table class="mobile-cards">
             <thead>
-                <tr><th>Chore</th><th>This week</th><th>Next Monday</th><th>Status</th><th></th></tr>
+                <tr><th>Chore</th><th>This week &rarr; Next Monday</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
                 {% for c in active_chores %}
-                <tr class="chore-list-row">
-                    <td class="cell-primary" data-label="Chore"><a href="{% url 'chore_detail' c.pk %}"><strong>{{ c.name }}</strong></a>{% if c.description %}<small class="sub">{{ c.description }}</small>{% endif %}</td>
-                    <td data-label="This week">
+                <tr class="chore-list-row" data-status="{% if c.current %}{{ c.current.status|lower }}{% else %}none{% endif %}">
+                    <td class="cell-primary" data-label="Chore">
+                        <a href="{% url 'chore_detail' c.pk %}"><strong>{{ c.name }}</strong></a>
+                        {% if c.description %}<small class="sub">{{ c.description }}</small>{% endif %}
+                    </td>
+                    <td data-label="Rotation">
                         {% if c.current %}
-                        <div class="member-cell">
-                            <span class="avatar avatar-sm avatar-c{{ c.current.member.id|divisibleby:4|yesno:'3,0' }}{% if c.current.member.id|divisibleby:3 %} avatar-c2{% elif c.current.member.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ c.current.member.display_name|slice:":1"|upper }}</span>
-                            <span>{{ c.current.member.display_name }}</span>
+                        <div class="handoff-flow">
+                            <span class="handoff-person">
+                                <span class="avatar avatar-sm avatar-c{{ c.current.member.id|divisibleby:4|yesno:'3,0' }}{% if c.current.member.id|divisibleby:3 %} avatar-c2{% elif c.current.member.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ c.current.member.display_name|slice:":1"|upper }}</span>
+                                <span>{{ c.current.member.display_name }}</span>
+                            </span>
+                            {% if c.next_member %}
+                            <span class="handoff-arrow" aria-hidden="true">&rarr;</span>
+                            <span class="next-pill">{{ c.next_member.display_name }}</span>
+                            {% endif %}
                         </div>
                         {% else %}&ndash;{% endif %}
                     </td>
-                    <td data-label="Next Monday">{% if c.next_member %}<span class="next-pill">&rarr; {{ c.next_member.display_name }}</span>{% else %}&ndash;{% endif %}</td>
                     <td data-label="Status">{% if c.current %}<span class="status {{ c.current.status|lower }}">{{ c.current.get_status_display }}</span>{% else %}&ndash;{% endif %}</td>
                     <td class="cell-action cell-actions-row">
                         <a class="btn-sm ghost btn-with-icon" href="{% url 'chore_edit' c.pk %}">
@@ -63,7 +81,7 @@
             </tbody>
         </table>
     </div>
-    <p class="empty filter-empty" hidden>No chores match your search.</p>
+    <p class="empty filter-empty" hidden>No chores match this filter.</p>
     {% else %}
     <div class="empty-box">
         <div class="empty-emblem" aria-hidden="true">
@@ -80,18 +98,22 @@
 </section>
 
 {% if retired_chores %}
-<section class="card animate-in">
-    <div class="card-head">
+<details class="card retired-drawer animate-in">
+    <summary class="retired-summary">
         <div>
             <h2>Retired chores ({{ retired_chores|length }})</h2>
-            <p class="card-sub">Retired chores get no new assignments. Their past history is preserved.</p>
+            <p class="card-sub">No longer assigned weekly, but past history is preserved.</p>
         </div>
-    </div>
-    <ul class="info-list compact-info">
+        <span class="retired-chevron" aria-hidden="true">&#9662;</span>
+    </summary>
+    <ul class="info-list compact-info retired-list">
         {% for c in retired_chores %}
-        <li><span><a href="{% url 'chore_detail' c.pk %}">{{ c.name }}</a></span><strong><span class="tag">Retired</span></strong></li>
+        <li>
+            <span><a href="{% url 'chore_detail' c.pk %}">{{ c.name }}</a>{% if c.description %}<small class="sub">{{ c.description }}</small>{% endif %}</span>
+            <strong><span class="tag">Retired</span></strong>
+        </li>
         {% endfor %}
     </ul>
-</section>
+</details>
 {% endif %}
 {% endblock %}
