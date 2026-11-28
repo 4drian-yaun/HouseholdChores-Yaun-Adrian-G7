@@ -6578,6 +6578,12 @@ button.mode-btn.active {
   box-shadow: 0 0 12px var(--focus-ring);
 }
 
+@media (max-width: 768px), (hover: none), (pointer: coarse) {
+  .kinetic-grid {
+    display: none !important;
+  }
+}
+
 /* Live badge dot + word-by-word kinetic headline */
 .kinetic-badge {
   display: inline-flex;
