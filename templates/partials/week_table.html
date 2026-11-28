@@ -6,19 +6,19 @@
     <strong class="progress-text">{{ overview.done }} of {{ overview.total }} done <span class="pct-pill {% if overview.percent >= 80 %}ok{% elif overview.percent >= 50 %}sun{% else %}warn{% endif %}">{{ overview.percent }}%</span></strong>
 </div>
 <div class="table-wrap">
-    <table class="chore-table">
+    <table class="chore-table mobile-cards">
         <thead>
             <tr><th>Chore</th><th>Assigned to</th><th>Status</th><th>Completed</th><th></th></tr>
         </thead>
         <tbody>
             {% for a in overview.assignments %}
             <tr class="chore-row{% if a.is_mine %} is-mine{% endif %}" data-mine="{% if a.is_mine %}true{% else %}false{% endif %}" data-status="{{ a.status|lower }}">
-                <td>
+                <td class="cell-primary" data-label="Chore">
                     <a href="{% url 'chore_detail' a.chore.pk %}"><strong>{{ a.chore.name }}</strong></a>
                     {% if not a.chore.is_active %} <span class="tag">retired</span>{% endif %}
                     {% if a.chore.description %}<small class="sub">{{ a.chore.description }}</small>{% endif %}
                 </td>
-                <td>
+                <td data-label="Assigned to">
                     <div class="member-cell">
                         <span class="avatar avatar-c{{ a.member.id|divisibleby:4|yesno:'3,0' }}{% if a.member.id|divisibleby:3 %} avatar-c2{% elif a.member.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ a.member.display_name|slice:":1"|upper }}</span>
                         <div>
@@ -29,9 +29,9 @@
                         </div>
                     </div>
                 </td>
-                <td><span class="status {{ a.status|lower }}">{{ a.get_status_display }}</span></td>
-                <td class="muted-cell">{% if a.completed_at %}{{ a.completed_at|date:"M d, g:i A" }}{% else %}&ndash;{% endif %}</td>
-                <td class="cell-action">
+                <td data-label="Status"><span class="status {{ a.status|lower }}">{{ a.get_status_display }}</span></td>
+                <td class="muted-cell" data-label="Completed">{% if a.completed_at %}{{ a.completed_at|date:"M d, g:i A" }}{% else %}&ndash;{% endif %}</td>
+                <td class="cell-action{% if not a.can_complete %} cell-empty-action{% endif %}">
                     {% if a.can_complete %}
                     <form method="post" action="{% url 'assignment_complete' a.pk %}" class="inline">
                         {% csrf_token %}

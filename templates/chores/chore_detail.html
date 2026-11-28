@@ -95,17 +95,17 @@
     </div>
     {% if assignments %}
     <div class="table-wrap">
-        <table>
+        <table class="mobile-cards">
             <thead>
                 <tr><th>Week</th><th>Assigned to</th><th>Status</th><th>Completed</th><th></th></tr>
             </thead>
             <tbody>
                 {% for a in assignments %}
                 <tr class="{% if a.is_mine %}is-mine{% endif %}">
-                    <td>
+                    <td class="cell-primary" data-label="Week">
                         <strong>{{ a.week_start_date|date:"M d" }} &ndash; {{ a.due_date|date:"M d, Y" }}</strong>
                     </td>
-                    <td>
+                    <td data-label="Assigned to">
                         <div class="member-cell">
                             <span class="avatar avatar-sm avatar-c{{ a.member.id|divisibleby:4|yesno:'3,0' }}{% if a.member.id|divisibleby:3 %} avatar-c2{% elif a.member.id|divisibleby:2 %} avatar-c1{% endif %}" aria-hidden="true">{{ a.member.display_name|slice:":1"|upper }}</span>
                             <span>
@@ -115,9 +115,9 @@
                             </span>
                         </div>
                     </td>
-                    <td><span class="status {{ a.status|lower }}">{{ a.get_status_display }}</span></td>
-                    <td class="muted-cell">{% if a.completed_at %}{{ a.completed_at|date:"M d, g:i A" }}{% else %}&ndash;{% endif %}</td>
-                    <td class="cell-action">
+                    <td data-label="Status"><span class="status {{ a.status|lower }}">{{ a.get_status_display }}</span></td>
+                    <td class="muted-cell" data-label="Completed">{% if a.completed_at %}{{ a.completed_at|date:"M d, g:i A" }}{% else %}&ndash;{% endif %}</td>
+                    <td class="cell-action{% if not a.can_complete %} cell-empty-action{% endif %}">
                         {% if a.can_complete %}
                         <form method="post" action="{% url 'assignment_complete' a.pk %}" class="inline">
                             {% csrf_token %}
