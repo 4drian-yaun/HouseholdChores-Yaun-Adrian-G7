@@ -21,9 +21,12 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=36">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}?v=37">
     </head>
     <body>
+        <div class="nav-loader" id="navLoader" aria-hidden="true">
+            <div class="nav-loader-bar"></div>
+        </div>
         <div class="scroll-progress-track" aria-hidden="true">
             <div class="scroll-progress-bar" data-scroll-progress></div>
         </div>
@@ -244,24 +247,93 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        <div class="page-skeleton" id="pageSkeleton" hidden aria-hidden="true">
+        <div class="page-skeleton" id="pageSkeleton" hidden aria-live="polite" aria-busy="true">
             <div class="skel-head">
-                <div class="skel skel-title"></div>
-                <div class="skel skel-sub"></div>
+                <div class="skel-head-copy">
+                    <div class="skel skel-title"></div>
+                    <div class="skel skel-sub"></div>
+                </div>
+                <div class="skel-status" role="status">
+                    <span class="skel-dots" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                    <span class="skel-status-text" id="skelStatusLabel">Loading&hellip;</span>
+                </div>
             </div>
             <div class="skel-stats">
-                <div class="skel skel-kpi"></div>
-                <div class="skel skel-kpi"></div>
-                <div class="skel skel-kpi"></div>
+                <div class="skel-kpi-card">
+                    <div class="skel-kpi-top">
+                        <div class="skel skel-label"></div>
+                        <div class="skel skel-icon"></div>
+                    </div>
+                    <div class="skel-kpi-bottom">
+                        <div class="skel skel-val"></div>
+                        <div class="skel skel-pill"></div>
+                    </div>
+                </div>
+                <div class="skel-kpi-card">
+                    <div class="skel-kpi-top">
+                        <div class="skel skel-label"></div>
+                        <div class="skel skel-icon"></div>
+                    </div>
+                    <div class="skel-kpi-bottom">
+                        <div class="skel skel-val"></div>
+                        <div class="skel skel-pill"></div>
+                    </div>
+                </div>
+                <div class="skel-kpi-card">
+                    <div class="skel-kpi-top">
+                        <div class="skel skel-label"></div>
+                        <div class="skel skel-icon"></div>
+                    </div>
+                    <div class="skel-kpi-bottom">
+                        <div class="skel skel-val"></div>
+                        <div class="skel skel-pill"></div>
+                    </div>
+                </div>
             </div>
             <div class="skel-card">
-                <div class="skel skel-line lg"></div>
-                <div class="skel skel-line"></div>
-                <div class="skel skel-line"></div>
-                <div class="skel skel-line sm"></div>
+                <div class="skel-card-head">
+                    <div class="skel skel-line lg"></div>
+                    <div class="skel skel-pill"></div>
+                </div>
+                <div class="skel-row">
+                    <div class="skel skel-avatar"></div>
+                    <div class="skel-row-text">
+                        <div class="skel skel-line"></div>
+                        <div class="skel skel-line sm"></div>
+                    </div>
+                    <div class="skel skel-badge"></div>
+                </div>
+                <div class="skel-row">
+                    <div class="skel skel-avatar"></div>
+                    <div class="skel-row-text">
+                        <div class="skel skel-line"></div>
+                        <div class="skel skel-line sm"></div>
+                    </div>
+                    <div class="skel skel-badge"></div>
+                </div>
+                <div class="skel-row">
+                    <div class="skel skel-avatar"></div>
+                    <div class="skel-row-text">
+                        <div class="skel skel-line"></div>
+                        <div class="skel skel-line sm"></div>
+                    </div>
+                    <div class="skel skel-badge"></div>
+                </div>
+                <div class="skel-row">
+                    <div class="skel skel-avatar"></div>
+                    <div class="skel-row-text">
+                        <div class="skel skel-line"></div>
+                        <div class="skel skel-line sm"></div>
+                    </div>
+                    <div class="skel skel-badge"></div>
+                </div>
             </div>
         </div>
         <main class="page" id="pageContent">{% block content %}{% endblock %}</main>
-        <script src="{% static 'js/app.js' %}?v=36" defer></script>
+        <script src="{% static 'js/app.js' %}?v=37" defer></script>
     </body>
 </html>
